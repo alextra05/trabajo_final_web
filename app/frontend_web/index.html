@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Academia de Programación</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .curso-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .curso-card { transition: all 0.3s ease; }
+    .badge { position: absolute; top: 10px; right: 10px; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-popular { background-color: #ef4444; color: white; }
+    .badge-nuevo { background-color: #3b82f6; color: white; }
+    .filter-active { background-color: #3b82f6; color: white; }
+    .tab-active { 
+      color: #3b82f6; 
+      border-bottom: 2px solid #3b82f6;
+    }
+    .tab-inactive {
+      color: #6b7280;
+      border-bottom: 2px solid transparent;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-white px-4 md:px-8 py-4 flex justify-between items-center border-b border-gray-200 shadow-sm sticky top-0 z-50">
+    <a href="/" class="text-2xl font-bold text-gray-900">Academia</a>
+    <div class="hidden md:flex items-center gap-8">
+      <nav class="flex items-center space-x-6">
+        <a href="#cursos" class="text-gray-800 hover:text-blue-600 font-medium">Cursos</a>
+      </nav>
+      <div class="flex items-center space-x-4" id="auth-buttons-desktop">
+        <a href="/login" class="px-4 py-2 border border-gray-300 rounded-md font-medium hover:bg-gray-50 transition">Iniciar sesión</a>
+        <a href="/register" class="px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition">Registrarse</a>
+      </div>
+      <div id="perfil-wrapper-desktop" class="relative hidden">
+        <button id="perfil-btn-desktop" class="w-10 h-10 rounded-full overflow-hidden focus:outline-none border-2 border-gray-200">
+          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Perfil" class="w-full h-full object-cover avatar-img">
+        </button>
+        <div id="perfil-dropdown-desktop" class="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg hidden z-10">
+          <a href="/perfil" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 auth-link">Mi perfil</a>
+          <a href="/mis-cursos" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 auth-link">Mis cursos</a>
+          
+          <hr class="my-1">
+          <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Cerrar sesión</button>
+        </div>
+      </div>
+    </div>
+    <button id="mobile-menu-button" class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </header>
+  <div id="mobile-menu" class="md:hidden bg-white border-b border-gray-200 hidden">
+    <nav class="flex flex-col px-4 py-2">
+      <a href="#cursos" class="py-2 text-gray-800 hover:text-blue-600">Cursos</a>
+    </nav>
+    <div class="px-4 py-4 border-t border-gray-200" id="auth-buttons-mobile">
+      <a href="/login" class="block w-full text-center mb-2 px-4 py-2 border border-gray-300 rounded-md font-medium hover:bg-gray-50 transition">Iniciar sesión</a>
+      <a href="/register" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition">Registrarse</a>
+    </div>
+    <div id="perfil-options-mobile" class="px-4 py-4 border-t border-gray-200 hidden">
+      <a href="/perfil" class="block py-2 text-gray-800 hover:text-blue-600 auth-link">Mi perfil</a>
+      <a href="/mis-cursos" class="block py-2 text-gray-800 hover:text-blue-600 auth-link">Mis cursos</a>
+      
+      <button onclick="logout()" class="block w-full text-left py-2 text-red-600 hover:text-red-700">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="relative bg-gradient-to-br from-slate-900 to-slate-800 text-white py-20 md:py-32">
+    <div class="container mx-auto px-4">
+      <div class="max-w-3xl mx-auto text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-6">Academia de Programación</h1>
+        <p class="text-xl text-slate-300 mb-8">
+          Aprende a programar con nuestros cursos online impartidos por expertos de la industria
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+          <a href="#cursos" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md inline-flex items-center justify-center">
+            Explorar cursos
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+          <a href="#" class="px-6 py-3 border border-white text-white font-medium rounded-md hover:bg-white/10 inline-flex items-center justify-center">
+            Saber más
+          </a>
+        </div>
+      </div>
+      <div class="max-w-4xl mx-auto mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+          <div class="text-3xl font-bold">50+</div>
+          <div class="text-sm text-slate-300">Cursos</div>
+        </div>
+        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+          <div class="text-3xl font-bold">25k+</div>
+          <div class="text-sm text-slate-300">Estudiantes</div>
+        </div>
+        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+          <div class="text-3xl font-bold">15+</div>
+          <div class="text-sm text-slate-300">Instructores</div>
+        </div>
+        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+          <div class="text-3xl font-bold">4.8</div>
+          <div class="text-sm text-slate-300">Valoración</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sección de cursos sin filtros -->
+  <section id="cursos" class="py-16">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold mb-4">Nuestros Cursos</h2>
+        <p class="text-gray-600 max-w-2xl mx-auto">
+          Explora nuestra selección de cursos diseñados para ayudarte a dominar las habilidades más demandadas en el mundo de la programación.
+        </p>
+      </div>
+      <div id="cursos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Las tarjetas de cursos se insertan aquí dinámicamente -->
+      </div>
+      <div class="text-center mt-12">
+        <a href="/cursos" class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-md inline-flex items-center justify-center transition">
+          Ver todos los cursos
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Beneficios -->
+  <section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold mb-4">¿Por qué elegirnos?</h2>
+        <p class="text-gray-600 max-w-2xl mx-auto">
+          Nuestra academia ofrece una experiencia de aprendizaje única con beneficios diseñados para ayudarte a alcanzar tus metas profesionales.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+            <i class="fas fa-book text-blue-600"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Contenido actualizado</h3>
+          <p class="text-gray-600">Cursos actualizados con las últimas tecnologías y metodologías.</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+            <i class="fas fa-laptop-code text-blue-600"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Aprendizaje práctico</h3>
+          <p class="text-gray-600">Enfocados en proyectos reales para aprender haciendo.</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+            <i class="fas fa-chalkboard-teacher text-blue-600"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Instructores expertos</h3>
+          <p class="text-gray-600">Profesionales con experiencia real en la industria.</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+            <i class="fas fa-clock text-blue-600"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Aprende a tu ritmo</h3>
+          <p class="text-gray-600">Acceso a los cursos 24/7 desde cualquier dispositivo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Suscripción -->
+  <section class="py-16 bg-gradient-to-br from-blue-600 to-blue-700 text-white">
+    <div class="container mx-auto px-4">
+      <div class="max-w-3xl mx-auto text-center">
+        <h2 class="text-3xl font-bold mb-4">¿Listo para comenzar tu viaje de aprendizaje?</h2>
+        <p class="text-blue-100 mb-8">Únete a nuestra comunidad de estudiantes y transforma tu carrera con nuestros cursos de programación.</p>
+        <form id="subscription-form" class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+          <input type="email" placeholder="Tu correo electrónico" class="px-4 py-3 rounded-md flex-1 bg-white/10 border border-white/20 text-white placeholder:text-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50" required>
+          <button type="submit" class="px-6 py-3 bg-white text-blue-600 font-medium rounded-md hover:bg-blue-50 transition">
+            Comenzar ahora
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer completo -->
+  <footer id="contacto" class="bg-slate-900 text-slate-400 py-12">
+
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <h3 class="text-white text-lg font-bold mb-4">Academia</h3>
+          <p class="mb-4">Formamos a los desarrolladores del futuro con cursos de alta calidad impartidos por expertos de la industria.</p>
+          <div class="flex space-x-4">
+            <a href="https://www.facebook.com/login" target="_blank" class="text-slate-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://twitter.com/login" target="_blank" class="text-slate-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.instagram.com/accounts/login/" target="_blank" class="text-slate-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/login" target="_blank" class="text-slate-400 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-white text-lg font-bold mb-4">Enlaces rápidos</h3>
+          <ul class="space-y-2">
+            <li><a href="/" class="hover:text-white transition">Inicio</a></li>
+            <li><a href="#cursos" class="hover:text-white transition">Cursos</a></li>
+
+            <li><a href="#contacto" class="hover:text-white transition">Contacto</a></li>
+
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-white text-lg font-bold mb-4">Contacto</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start"><i class="fas fa-map-marker-alt mr-2 mt-1"></i><span>Calle Principal 123, Ciudad</span></li>
+            <li class="flex items-start"><i class="fas fa-envelope mr-2 mt-1"></i><span>info@academia.com</span></li>
+            <li class="flex items-start"><i class="fas fa-phone-alt mr-2 mt-1"></i><span>+34 123 456 789</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-slate-800 mt-12 pt-8 text-center">
+        <p>&copy; 2025 Academia. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Modal para mostrar usuarios inscritos -->
+  <div id="usuarios-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+      <div class="p-4 border-b flex justify-between items-center">
+        <h3 class="text-lg font-bold" id="modal-title">Usuarios inscritos</h3>
+        <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="p-4 max-h-96 overflow-y-auto" id="modal-content">
+        <!-- Contenido del modal -->
+      </div>
+      <div class="p-4 border-t">
+        <button id="modal-close-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 w-full">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Definición de la URL de la API
+    const API_URL = "http://localhost:8000";
+
+    // ==========================================
+    // FUNCIONES AUXILIARES
+    // ==========================================
+
+    function getToken() {
+      return localStorage.getItem("token");
+    }
+
+    function logout() {
+      // Eliminar el token de localStorage
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("remember_session");
+      // Redirigir a la página principal
+      window.location.href = '/';
+    }
+
+    function mostrarNotificacion(mensaje, tipo = 'success') {
+      const noti = document.createElement('div');
+      noti.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm text-white ${
+        tipo === 'success' ? 'bg-green-500' :
+        tipo === 'error' ? 'bg-red-500' : 'bg-blue-500'
+      }`;
+      noti.textContent = mensaje;
+      document.body.appendChild(noti);
+      setTimeout(() => document.body.removeChild(noti), 3000);
+    }
+
+    // ==========================================
+    // FUNCIÓN DE VERIFICACIÓN DE SESIÓN
+    // ==========================================
+
+    // Verificar si hay sesión activa
+    function checkSession() {
+      const token = getToken();
+      
+      if (!token) {
+        console.log('No hay token almacenado');
+        // Asegurarse de que los botones de autenticación estén visibles
+        document.getElementById('auth-buttons-desktop')?.classList.remove('hidden');
+        document.getElementById('auth-buttons-mobile')?.classList.remove('hidden');
+        document.getElementById('perfil-wrapper-desktop')?.classList.add('hidden');
+        document.getElementById('perfil-options-mobile')?.classList.add('hidden');
+        
+        // También actualizar los elementos de la barra de navegación principal si existen
+        document.getElementById('login-link')?.classList.remove('hidden');
+        document.getElementById('register-link')?.classList.remove('hidden');
+        document.getElementById('perfil-wrapper')?.classList.add('hidden');
+        return;
+      }
+      
+      // Realizamos la petición al backend para obtener los datos del usuario
+      fetch(`${API_URL}/usuarios/me`, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('No hay sesión activa');
+        return res.json();
+      })
+      .then(user => {
+        console.log('Usuario autenticado:', user);
+        
+        // Mostrar elementos de perfil y ocultar botones de autenticación
+        const authButtonsDesktop = document.getElementById('auth-buttons-desktop');
+        const authButtonsMobile = document.getElementById('auth-buttons-mobile');
+        const perfilWrapperDesktop = document.getElementById('perfil-wrapper-desktop');
+        const perfilOptionsMobile = document.getElementById('perfil-options-mobile');
+        
+        if (authButtonsDesktop) authButtonsDesktop.classList.add('hidden');
+        if (authButtonsMobile) authButtonsMobile.classList.add('hidden');
+        if (perfilWrapperDesktop) perfilWrapperDesktop.classList.remove('hidden');
+        if (perfilOptionsMobile) perfilOptionsMobile.classList.remove('hidden');
+        
+        // También actualizar los elementos de la barra de navegación principal si existen
+        const loginLink = document.getElementById('login-link');
+        const registerLink = document.getElementById('register-link');
+        const perfilWrapper = document.getElementById('perfil-wrapper');
+        
+        if (loginLink) loginLink.classList.add('hidden');
+        if (registerLink) registerLink.classList.add('hidden');
+        if (perfilWrapper) perfilWrapper.classList.remove('hidden');
+        
+        // Actualizar la inicial del perfil si existe
+        const perfilInicial = document.getElementById('perfil-inicial');
+        if (perfilInicial && user.nombre) {
+          perfilInicial.textContent = user.nombre.charAt(0).toUpperCase();
+        }
+        
+        // Actualizar la imagen de perfil con la inicial del usuario si no hay imagen
+        const avatarImgs = document.querySelectorAll('.avatar-img');
+        avatarImgs.forEach(img => {
+          // Si hay una URL de imagen de perfil en el usuario, usarla
+          if (user.imagen_perfil) {
+            img.src = user.imagen_perfil;
+          } else {
+            // Si no hay imagen, generar un avatar con la inicial del usuario
+            const nombre = encodeURIComponent(user.nombre || 'Usuario');
+            img.src = `https://ui-avatars.com/api/?name=${nombre}&background=random&color=fff`;
+          }
+        });
+      })
+      .catch(err => {
+        console.log('Error de sesión:', err.message);
+        // Si hay error, limpiar el token
+        localStorage.removeItem("token");
+        // Asegurarse de que los botones de autenticación estén visibles
+        document.getElementById('auth-buttons-desktop')?.classList.remove('hidden');
+        document.getElementById('auth-buttons-mobile')?.classList.remove('hidden');
+        document.getElementById('perfil-wrapper-desktop')?.classList.add('hidden');
+        document.getElementById('perfil-options-mobile')?.classList.add('hidden');
+        
+        // También actualizar los elementos de la barra de navegación principal si existen
+        document.getElementById('login-link')?.classList.remove('hidden');
+        document.getElementById('register-link')?.classList.remove('hidden');
+        document.getElementById('perfil-wrapper')?.classList.add('hidden');
+      });
+    }
+
+    // ==========================================
+    // FUNCIONES DE CURSOS
+    // ==========================================
+
+    // Función para inscribirse a un curso
+    function inscribirseCurso(cursoId) {
+      const token = getToken();
+      if (!token) {
+        // Si no está autenticado, redirigir al login
+        window.location.href = `/login?next=/curso/${cursoId}`;
+        return;
+      }
+
+      // Hacer la petición para inscribirse
+      fetch(`${API_URL}/usuarios/inscribirse/${cursoId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => {
+        if (!res.ok) {
+          if (res.status === 400) {
+            return res.json().then(data => {
+              throw new Error(data.detail || 'Ya estás inscrito en este curso');
+            });
+          }
+          throw new Error('Error al inscribirse al curso');
+        }
+        return res.json();
+      })
+      .then(data => {
+        mostrarNotificacion('¡Te has inscrito correctamente al curso!', 'success');
+        // Recargar la página para actualizar la información
+        window.location.reload();
+      })
+      .catch(err => {
+        mostrarNotificacion(err.message, 'error');
+      });
+    }
+
+    // Función para cargar cursos destacados
+    function loadFeaturedCourses() {
+      const token = getToken();
+      
+      // Primero, obtenemos los cursos en los que está inscrito el usuario (si está autenticado)
+      let cursosInscritos = [];
+      
+      if (token) {
+        // Obtener los cursos en los que el usuario está inscrito
+        fetch(`${API_URL}/usuarios/mis-cursos`, {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(res => {
+          if (res.ok) return res.json();
+          return [];
+        })
+        .then(misCursos => {
+          // Guardar los IDs de los cursos en los que está inscrito
+          cursosInscritos = misCursos.map(curso => curso.id);
+          
+          // Ahora cargar los cursos destacados
+          cargarCursosDestacados(cursosInscritos);
+        })
+        .catch(err => {
+          console.error('Error al obtener cursos inscritos:', err);
+          // Si hay error, cargar los cursos destacados sin información de inscripción
+          cargarCursosDestacados([]);
+        });
+      } else {
+        // Si no hay token, cargar los cursos destacados sin información de inscripción
+        cargarCursosDestacados([]);
+      }
+      
+      // Función interna para cargar los cursos destacados
+      function cargarCursosDestacados(cursosInscritos) {
+        fetch(`${API_URL}/cursos`, {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        })
+        .then(res => res.json())
+        .then(cursos => {
+          const container = document.getElementById('cursos-container');
+          
+          if (!cursos || cursos.length === 0) {
+            container.innerHTML = '<p class="text-center col-span-full">No hay cursos destacados disponibles en este momento.</p>';
+            return;
+          }
+          
+          // Mostrar solo los primeros 3-6 cursos
+          const cursosAMostrar = cursos.slice(0, 6);
+          
+          container.innerHTML = cursosAMostrar.map(curso => {
+            // Verificar si el usuario está inscrito en este curso
+            const inscrito = cursosInscritos.includes(curso.id);
+            
+            return `
+              <div class="curso-card bg-white rounded-xl shadow-md overflow-hidden relative">
+                <div class="h-48 bg-gray-200 relative">
+                  ${curso.imagen 
+                    ? `<img src="${curso.imagen}" alt="${curso.nombre}" class="w-full h-full object-cover">`
+                    : `<div class="w-full h-full flex items-center justify-center text-gray-400">
+                         <i class="fas fa-laptop-code text-4xl"></i>
+                       </div>`
+                  }
+                  ${curso.destacado ? '<span class="badge badge-popular">Popular</span>' : ''}
+                  ${curso.nuevo ? '<span class="badge badge-nuevo">Nuevo</span>' : ''}
+                </div>
+                <div class="p-6">
+                  <h3 class="font-bold text-xl mb-2">${curso.nombre}</h3>
+                  <p class="text-gray-600 mb-4 min-h-[72px]">${curso.descripcion?.substring(0, 100) || 'Sin descripción'}${curso.descripcion?.length > 100 ? '...' : ''}</p>
+                  
+                  <!-- Nueva sección dividida en 2 con línea divisoria -->
+                  <div class="border-t pt-4 mt-2">
+                    <div class="flex justify-between items-center">
+                      <!-- Lado izquierdo: botón de inscripción -->
+                      <div class="flex-1 pr-2">
+                        ${inscrito 
+                          ? `<button disabled class="w-full py-2 px-3 bg-green-600 text-white text-sm font-medium rounded-md transition cursor-not-allowed">
+                               Ya inscrito
+                             </button>`
+                          : `<button onclick="inscribirseCurso(${curso.id})" class="w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition">
+                               Inscribirme
+                             </button>`
+                        }
+                      </div>
+                      
+                      <!-- Separador vertical para desktop -->
+                      <div class="hidden md:block h-8 border-l border-gray-200 mx-2"></div>
+                      
+                      <!-- Lado derecho: botón para ver participantes -->
+                      <div class="flex-1 pl-2 text-right">
+                        <button onclick="verPersonas(${curso.id})" class="w-full py-2 px-3 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50 transition">
+                          <span class="flex items-center justify-center">
+                            <i class="fas fa-users mr-1"></i>
+                            <span>Ver personas${curso.inscritos > 0 ? ` (${curso.inscritos})` : ''}</span>
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        })
+        .catch(err => {
+          console.error('Error al cargar cursos:', err);
+          const container = document.getElementById('cursos-container');
+          container.innerHTML = '<p class="text-center col-span-full">Error al cargar los cursos. Inténtalo de nuevo más tarde.</p>';
+        });
+      }
+    }
+
+    // Función para mostrar los usuarios inscritos en un curso
+    function verPersonas(cursoId) {
+      const modal = document.getElementById('usuarios-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalContent = document.getElementById('modal-content');
+      const token = getToken();
+      
+      // Mostrar el modal con un loader
+      modal.classList.remove('hidden');
+      modalContent.innerHTML = '<div class="flex justify-center py-8"><i class="fas fa-spinner fa-spin text-3xl text-blue-600"></i></div>';
+      
+      // Obtener los usuarios inscritos en el curso
+      fetch(`${API_URL}/cursos/${cursoId}/participantes`, {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Error al obtener los usuarios');
+        return res.json();
+      })
+      .then(usuarios => {
+        modalTitle.textContent = `Usuarios inscritos (${usuarios.length})`;
+        
+        if (usuarios.length === 0) {
+          modalContent.innerHTML = '<p class="text-center py-4 text-gray-500">No hay usuarios inscritos en este curso.</p>';
+          return;
+        }
+        
+        // Crear la lista de usuarios
+        const usuariosHTML = usuarios.map(usuario => `
+          <div class="flex items-center gap-3 py-2 border-b border-gray-100">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+              ${usuario.nombre?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
+            <div>
+              <p class="font-medium">${usuario.nombre} ${usuario.apellidos || ''}</p>
+              <p class="text-sm text-gray-500">${usuario.email}</p>
+            </div>
+          </div>
+        `).join('');
+        
+        modalContent.innerHTML = usuariosHTML;
+      })
+      .catch(err => {
+        modalContent.innerHTML = `<p class="text-center py-4 text-red-500">${err.message}</p>`;
+      });
+    }
+
+    // Función para cerrar el modal
+    function cerrarModal() {
+      const modal = document.getElementById('usuarios-modal');
+      modal.classList.add('hidden');
+    }
+
+    // ==========================================
+    // FUNCIÓN PARA MANEJAR ENLACES PROTEGIDOS
+    // ==========================================
+
+    // Función para manejar enlaces que requieren autenticación
+    function setupAuthLinks() {
+      document.querySelectorAll('.auth-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const token = localStorage.getItem('token');
+          const destino = this.getAttribute('href');
+          
+          if (!token) {
+            // Si no hay token, redirigir al login
+            window.location.href = `/login?next=${destino}`;
+            return;
+          }
+          
+          // Establecer un iframe oculto para enviar el token como parte del header
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = destino;
+          form.style.display = 'none';
+          
+          // Agregar el token como un campo oculto
+          const tokenField = document.createElement('input');
+          tokenField.type = 'hidden';
+          tokenField.name = 'access_token';
+          tokenField.value = token;
+          
+          form.appendChild(tokenField);
+          document.body.appendChild(form);
+          
+          // Establecer la cookie con el token (válida para esta sesión)
+          document.cookie = `access_token=${token}; path=/`;
+          
+          // Hacer una petición para verificar que el token es válido
+          fetch(`${API_URL}/usuarios/me`, {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json'
+            }
+          })
+          .then(res => {
+            if (!res.ok) {
+              throw new Error('Token inválido');
+            }
+            // Si el token es válido, redirigir a la página destino
+            window.location.href = destino;
+          })
+          .catch(err => {
+            console.error('Error de autenticación:', err);
+            // Si hay un error, limpiar el token y redirigir al login
+            localStorage.removeItem('token');
+            window.location.href = `/login?next=${destino}`;
+          });
+        });
+      });
+    }
+
+    // ==========================================
+    // INICIALIZACIÓN GENERAL
+    // ==========================================
+
+    // Cuando el DOM esté cargado, inicializar la aplicación
+    document.addEventListener('DOMContentLoaded', function() {
+      // Verificar la sesión cada vez que carga la página
+      checkSession();
+      
+      // Cargar los cursos destacados
+      const cursosContainer = document.getElementById('cursos-container');
+      if (cursosContainer) {
+        loadFeaturedCourses();
+      }
+      
+      // Configurar los enlaces protegidos
+      setupAuthLinks();
+      
+      // Manejar el formulario de suscripción
+      document.getElementById('subscription-form')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = this.querySelector('input[type="email"]').value;
+        mostrarNotificacion(`¡Gracias por suscribirte con ${email}!`, 'success');
+        this.reset();
+      });
+
+      // Funcionalidad del menú móvil
+      document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenu.classList.toggle('hidden');
+      });
+
+      // Funcionalidad del dropdown de perfil en desktop
+      document.getElementById('perfil-btn-desktop')?.addEventListener('click', function() {
+        const dropdown = document.getElementById('perfil-dropdown-desktop');
+        dropdown.classList.toggle('hidden');
+      });
+
+      // Cerrar dropdown al hacer clic fuera
+      document.addEventListener('click', function(e) {
+        const perfilBtn = document.getElementById('perfil-btn-desktop');
+        const dropdown = document.getElementById('perfil-dropdown-desktop');
+        
+        if (perfilBtn && dropdown && !perfilBtn.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.add('hidden');
+        }
+      });
+
+      // Configurar eventos para el modal
+      document.getElementById('close-modal')?.addEventListener('click', cerrarModal);
+      document.getElementById('modal-close-btn')?.addEventListener('click', cerrarModal);
+      
+      // Cerrar modal al hacer clic fuera
+      document.getElementById('usuarios-modal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+          cerrarModal();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

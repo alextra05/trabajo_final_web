@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard | Academia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white shadow p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold">Panel de Usuario</h1>
+
+    <!-- Avatar usuario -->
+    <div class="relative group">
+      <button id="perfil-btn" class="w-10 h-10 rounded-full bg-purple-600 text-white font-semibold flex items-center justify-center uppercase focus:outline-none">
+        <span id="perfil-inicial">U</span>
+      </button>
+      <div id="perfil-dropdown" class="absolute right-0 mt-2 w-44 bg-white border rounded shadow-md hidden z-10">
+        <a href="/perfil" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mi perfil</a>
+        <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-grow container mx-auto px-4 py-8 max-w-4xl">
+    <h2 id="bienvenida" class="text-xl font-semibold mb-6 text-center">Cargando usuario...</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Sidebar izquierdo con información del usuario -->
+      <div class="md:col-span-1">
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+          <div class="text-center mb-4">
+            <div class="w-20 h-20 mx-auto rounded-full bg-purple-600 flex items-center justify-center text-white text-2xl font-bold mb-2">
+              <span id="avatar-inicial">U</span>
+            </div>
+            <h3 id="nombre-completo" class="text-lg font-semibold">Usuario</h3>
+            <p id="email-usuario" class="text-sm text-gray-500">correo@example.com</p>
+            <p id="tipo-usuario" class="mt-1 inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Usuario</p>
+          </div>
+          
+          <div class="border-t pt-4 mt-4">
+            <div class="flex justify-between text-sm mb-2">
+              <span class="text-gray-600">Miembro desde:</span>
+              <span id="fecha-registro" class="font-medium">...</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Estado:</span>
+              <span id="usuario-estado" class="font-medium text-green-600">Activo</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Sección de navegación -->
+        <div class="bg-white rounded-lg shadow p-4">
+          <h4 class="font-medium text-gray-700 mb-3">Navegación</h4>
+          <nav class="space-y-1">
+            <a href="#" class="block px-3 py-2 rounded text-blue-600 bg-blue-50 font-medium">
+              <i class="fas fa-user-edit mr-2"></i> Editar perfil
+            </a>
+            <a href="/mis-cursos" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-50">
+              <i class="fas fa-book mr-2"></i> Mis cursos
+            </a>
+            <a href="/" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-50">
+              <i class="fas fa-home mr-2"></i> Volver al inicio
+            </a>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Contenido principal con formulario de edición -->
+      <div class="md:col-span-2">
+        <!-- Usuario regular - Edición de perfil -->
+        <section id="user-section" class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-lg font-semibold mb-6 pb-2 border-b">Editar perfil</h3>
+          
+          <!-- Formulario completo para actualizar datos -->
+          <form id="form-actualizar" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="nuevo-nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                <input type="text" id="nuevo-nombre" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+              
+              <div>
+                <label for="nuevo-apellido" class="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
+                <input type="text" id="nuevo-apellido" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+            </div>
+            
+            <div>
+              <label for="nuevo-email" class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
+              <input type="email" id="nuevo-email" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div>
+              <label for="nueva-pass" class="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña <span class="text-gray-500 text-xs">(dejar en blanco para mantener la actual)</span></label>
+              <input type="password" id="nueva-pass" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div>
+              <label for="confirmar-pass" class="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>
+              <input type="password" id="confirmar-pass" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div class="pt-4">
+              <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition">
+                Guardar cambios
+              </button>
+              <button type="reset" class="ml-2 border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded-md hover:bg-gray-50 transition">
+                Cancelar
+              </button>
+            </div>
+          </form>
+
+          <p id="mensaje-actualizar" class="mt-4 text-sm text-green-600 bg-green-50 p-3 rounded hidden">
+            <i class="fas fa-check-circle mr-1"></i> Datos actualizados correctamente.
+          </p>
+        </section>
+
+        <!-- Sección admin (oculta por defecto) -->
+        <section id="admin-section" class="bg-white rounded-lg shadow p-6 hidden">
+          <h3 class="text-lg font-semibold mb-4 pb-2 border-b">Gestión de Cursos</h3>
+          <p class="text-gray-700 mb-4">Aquí puede crear/modificar cursos.</p>
+          <!-- Aquí iría el contenido para la gestión de cursos -->
+        </section>
+
+        <!-- Sección superadmin (oculta por defecto) -->
+        <section id="super-section" class="bg-white rounded-lg shadow p-6 hidden">
+          <h3 class="text-lg font-semibold mb-4 pb-2 border-b">Gestión de Usuarios</h3>
+          <p class="text-gray-700 mb-4">Aquí puede habilitar o crear administradores.</p>
+          <!-- Aquí iría el contenido para la gestión de usuarios -->
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-200 text-center text-sm text-gray-600 py-4 mt-8">
+    &copy; 2025 Academia. Todos los derechos reservados.
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script src="/static/js/main.js"></script>
+  <script>
+    function logout() {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+    }
+
+    function formatearFecha(iso) {
+      // Comprobamos si la fecha es válida
+      if (!iso) return "Fecha no disponible";
+      
+      try {
+        const fecha = new Date(iso);
+        
+        // Verificamos si la fecha es válida
+        if (isNaN(fecha.getTime())) {
+          return "Fecha inválida";
+        }
+        
+        // Formateamos la fecha para mostrarla en español
+        return fecha.toLocaleDateString("es-ES", {
+          day: "numeric",
+          month: "long",
+          year: "numeric"
+        });
+      } catch (error) {
+        console.error("Error al formatear fecha:", error);
+        return "Error en formato de fecha";
+      }
+    }
+
+    // Carga de datos de usuario
+    const token = localStorage.getItem("token");
+    const inicialEl = document.getElementById("perfil-inicial");
+    const avatarInicialEl = document.getElementById("avatar-inicial");
+    const perfilBtn = document.getElementById("perfil-btn");
+    const dropdown = document.getElementById("perfil-dropdown");
+    const nombreCompletoEl = document.getElementById("nombre-completo");
+    const emailUsuarioEl = document.getElementById("email-usuario");
+    const tipoUsuarioEl = document.getElementById("tipo-usuario");
+    const fechaRegistroEl = document.getElementById("fecha-registro");
+    const estadoUsuarioEl = document.getElementById("usuario-estado");
+    const bienvenidaEl = document.getElementById("bienvenida");
+    
+    const formulario = document.getElementById("form-actualizar");
+    const nuevoNombreInput = document.getElementById("nuevo-nombre");
+    const nuevoApellidoInput = document.getElementById("nuevo-apellido");
+    const nuevoEmailInput = document.getElementById("nuevo-email");
+    const nuevaPassInput = document.getElementById("nueva-pass");
+    const confirmarPassInput = document.getElementById("confirmar-pass");
+    const mensajeActualizar = document.getElementById("mensaje-actualizar");
+
+    if (token) {
+      fetch("http://localhost:8000/usuarios/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(user => {
+        // Actualizar la info del perfil
+        const letra = user.nombre?.charAt(0)?.toUpperCase() || "U";
+        inicialEl.textContent = letra;
+        avatarInicialEl.textContent = letra;
+        
+        const nombreCompleto = `${user.nombre || ""} ${user.apellidos || ""}`.trim();
+        nombreCompletoEl.textContent = nombreCompleto || "Usuario";
+        emailUsuarioEl.textContent = user.email || "correo@example.com";
+        
+        // Mostrar tipo de usuario
+        let tipoTexto = "Usuario";
+        let tipoClase = "bg-blue-100 text-blue-800";
+        
+        if (user.tipo === "admin") {
+          tipoTexto = "Administrador";
+          tipoClase = "bg-purple-100 text-purple-800";
+        } else if (user.tipo === "super") {
+          tipoTexto = "Super Admin";
+          tipoClase = "bg-red-100 text-red-800";
+        }
+        
+        tipoUsuarioEl.textContent = tipoTexto;
+        tipoUsuarioEl.className = `mt-1 inline-block ${tipoClase} text-xs px-2 py-1 rounded`;
+        
+        // Actualizar mensaje de bienvenida
+        bienvenidaEl.textContent = `¡Bienvenido, ${user.nombre || "Usuario"}!`;
+        
+        // Actualizar fecha y estado
+        fechaRegistroEl.textContent = formatearFecha(user.fecha_creacion);
+        estadoUsuarioEl.textContent = user.habilitado ? "Activo" : "Desactivado";
+        estadoUsuarioEl.className = user.habilitado ? "font-medium text-green-600" : "font-medium text-red-600";
+        
+        // Preparar formulario
+        nuevoNombreInput.value = user.nombre || "";
+        nuevoApellidoInput.value = user.apellidos || "";
+        nuevoEmailInput.value = user.email || "";
+        
+        // Mostrar sección según el tipo de usuario
+        document.getElementById("user-section").classList.remove("hidden");
+        
+        if (user.tipo === "admin" || user.tipo === "super") {
+          document.getElementById("admin-section").classList.remove("hidden");
+        }
+        
+        if (user.tipo === "super") {
+          document.getElementById("super-section").classList.remove("hidden");
+        }
+      })
+      .catch(err => {
+        console.error("Error al cargar usuario:", err);
+        logout();
+      });
+
+      // Toggle dropdown
+      perfilBtn?.addEventListener("click", () => {
+        dropdown.classList.toggle("hidden");
+      });
+
+      document.addEventListener("click", function (e) {
+        if (!perfilBtn.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.add("hidden");
+        }
+      });
+      
+      // Manejo del formulario
+      formulario.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        
+        // Validar contraseñas si se ha ingresado una nueva
+        if (nuevaPassInput.value && nuevaPassInput.value !== confirmarPassInput.value) {
+          alert("Las contraseñas no coinciden");
+          return;
+        }
+        
+        const datosActualizados = {
+          nombre: nuevoNombreInput.value,
+          apellidos: nuevoApellidoInput.value,
+          email: nuevoEmailInput.value
+        };
+        
+        // Solo incluir la contraseña si se ha ingresado
+        if (nuevaPassInput.value) {
+          datosActualizados.password = nuevaPassInput.value;
+        }
+        
+        try {
+          const res = await fetch("http://localhost:8000/usuarios/me", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(datosActualizados)
+          });
+          
+          if (res.ok) {
+            mensajeActualizar.classList.remove("hidden");
+            
+            // Actualizar nombre en la página
+            nombreCompletoEl.textContent = `${nuevoNombreInput.value} ${nuevoApellidoInput.value}`.trim();
+            emailUsuarioEl.textContent = nuevoEmailInput.value;
+            
+            // Actualizar inicial
+            const nuevaInicial = nuevoNombreInput.value.charAt(0).toUpperCase() || "U";
+            inicialEl.textContent = nuevaInicial;
+            avatarInicialEl.textContent = nuevaInicial;
+            
+            // Limpiar campos de contraseña
+            nuevaPassInput.value = "";
+            confirmarPassInput.value = "";
+            
+            // Ocultar mensaje después de un tiempo
+            setTimeout(() => {
+              mensajeActualizar.classList.add("hidden");
+            }, 3000);
+          } else {
+            alert("Hubo un error al actualizar el perfil");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Hubo un error al actualizar el perfil");
+        }
+      });
+    } else {
+      window.location.href = "/login";
+    }
+  </script>
+</body>
+</html>

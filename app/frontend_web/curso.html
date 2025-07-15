@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Curso | Academia de Programación</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-white px-8 py-4 flex justify-between items-center border-b border-gray-200 shadow-sm">
+    <div class="text-xl font-bold text-gray-900">Academia</div>
+    <nav class="space-x-4 flex items-center">
+      <a href="/" class="text-gray-800 hover:text-blue-600">Inicio</a>
+
+      <!-- Botones login/register -->
+      <div id="auth-buttons" class="space-x-4">
+        <a href="/login" class="px-4 py-2 border border-gray-800 rounded font-semibold hover:bg-gray-100 transition">Iniciar sesión</a>
+        <a href="/register" class="px-4 py-2 bg-black text-white rounded font-semibold hover:bg-gray-900 transition">Registrarse</a>
+      </div>
+
+      <!-- Avatar -->
+      <div id="avatar-container" class="relative group hidden">
+        <button id="perfil-btn" class="w-10 h-10 rounded-full bg-purple-600 text-white font-semibold flex items-center justify-center uppercase focus:outline-none">
+          <span id="perfil-inicial">A</span>
+        </button>
+        <div id="perfil-dropdown" class="absolute right-0 mt-2 w-44 bg-white border rounded shadow-md hidden group-hover:block z-10">
+          <a href="/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mi perfil</a>
+          <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Cerrar sesión</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="flex-grow container mx-auto px-4 py-8 max-w-2xl">
+    <div id="curso-detalle" class="bg-white p-6 rounded shadow">
+      <h1 id="curso-nombre" class="text-2xl font-bold mb-2">Cargando...</h1>
+      <p id="curso-descripcion" class="mb-4 text-gray-700"></p>
+      <p><strong>Duración:</strong> <span id="curso-duracion"></span></p>
+      <p><strong>Disponible:</strong> <span id="curso-disponible"></span></p>
+    </div>
+
+    <!-- Error -->
+    <div id="curso-error" class="mt-6 text-red-600 hidden">No se pudo cargar la información del curso.</div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-200 text-center text-sm text-gray-600 py-4">
+    &copy; 2025 Academia. Todos los derechos reservados.
+  </footer>
+
+  <script>
+    const API_URL = "http://localhost:8000";
+
+    function logout() {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+
+      if (!id) {
+        document.getElementById("curso-error").classList.remove("hidden");
+        return;
+      }
+
+      fetch(`${API_URL}/cursos/${id}`)
+        .then(res => {
+          if (!res.ok) throw new Error("No encontrado");
+          return res.json();
+        })
+        .then(curso => {
+          document.getElementById("curso-nombre").textContent = curso.nombre;
+          document.getElementById("curso-descripcion").textContent = curso.descripcion;
+          document.getElementById("curso-duracion").textContent = curso.duracion;
+          document.getElementById("curso-disponible").textContent = curso.disponible ? "Sí" : "No";
+        })
+        .catch(err => {
+          console.error("Error al cargar el curso:", err);
+          document.getElementById("curso-error").classList.remove("hidden");
+        });
+
+      // Avatar dinámico
+      const token = localStorage.getItem("token");
+      const avatarContainer = document.getElementById("avatar-container");
+      const perfilInicial = document.getElementById("perfil-inicial");
+      const authButtons = document.getElementById("auth-buttons");
+      const perfilBtn = document.getElementById("perfil-btn");
+      const dropdown = document.getElementById("perfil-dropdown");
+
+      if (token) {
+        fetch(`${API_URL}/usuarios/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(user => {
+          const letra = user.nombre?.charAt(0)?.toUpperCase() || "U";
+          perfilInicial.textContent = letra;
+          avatarContainer.classList.remove("hidden");
+          authButtons.classList.add("hidden");
+        })
+        .catch(err => {
+          console.error("Error al cargar usuario:", err);
+          logout();
+        });
+
+        perfilBtn?.addEventListener("click", () => {
+          dropdown.classList.toggle("hidden");
+        });
+
+        document.addEventListener("click", (e) => {
+          if (!perfilBtn.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add("hidden");
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

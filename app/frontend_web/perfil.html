@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mi Perfil | Academia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
+
+  <!-- Header -->
+  <header class="fixed top-0 left-0 w-full bg-white px-8 py-4 flex justify-between items-center border-b border-gray-200 shadow-sm z-40">
+    <a href="/" class="text-xl font-bold text-gray-900">Academia</a>
+
+    <!-- Perfil fijo -->
+    <div id="perfil-wrapper" class="relative hidden">
+      <button id="perfil-btn" class="w-10 h-10 rounded-full overflow-hidden focus:outline-none">
+        <img id="perfil-imagen"
+             src="/static/img/default-avatar.png"
+             alt="Perfil"
+             class="w-full h-full object-cover avatar-img"
+        >
+      </button>
+      <div id="perfil-dropdown" class="absolute right-0 mt-2 w-44 bg-white border rounded shadow-md hidden z-10">
+        <a href="/perfil" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mi perfil</a>
+        <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="max-w-3xl mx-auto pt-28 p-4 space-y-6">
+
+    <!-- Tarjeta de perfil -->
+    <div class="bg-white rounded shadow p-6 text-center">
+      <p class="text-sm font-medium text-gray-600 mb-1">Foto de perfil</p>
+      <img id="user-avatar" src="/static/img/default-avatar.png" alt="Foto de perfil" class="w-24 h-24 mx-auto rounded-full object-cover mb-4">
+      <h2 id="nombre-perfil" class="text-xl font-semibold">Nombre</h2>
+      <p id="email-perfil" class="text-gray-500 text-sm mb-2">correo@example.com</p>
+      <span class="text-xs bg-gray-200 rounded-full px-2 py-1 text-gray-700">Estudiante</span>
+
+      <div class="flex justify-between mt-6 text-sm text-gray-600">
+        <div><strong>Miembro desde:</strong></div>
+        <div id="fecha-registro">...</div>
+      </div>
+
+      <!-- Cambiado para que enlace a dashboard en lugar de activar la función -->
+      <a href="/dashboard" class="mt-4 px-4 py-2 border border-gray-800 rounded hover:bg-gray-100 transition text-sm inline-block">Editar perfil</a>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="bg-white rounded shadow p-6">
+      <h3 class="text-lg font-semibold mb-4">Mis estadísticas</h3>
+      <div class="grid grid-cols-2 gap-4 text-center text-sm">
+        <div>
+          <p id="stat-vistos" class="text-xl font-bold text-gray-800">0</p>
+          <p class="text-gray-500">Cursos vistos</p>
+        </div>
+        <div>
+          <p id="stat-completados" class="text-xl font-bold text-gray-800">0</p>
+          <p class="text-gray-500">Completados</p>
+        </div>
+        <div>
+          <p id="stat-certificados" class="text-xl font-bold text-gray-800">0</p>
+          <p class="text-gray-500">Certificados</p>
+        </div>
+        <div>
+          <p id="stat-preguntas" class="text-xl font-bold text-gray-800">0</p>
+          <p class="text-gray-500">Preguntas</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de Navegación eliminada -->
+
+    <!-- Formulario de edición -->
+    <div id="form-editar-container" class="bg-white rounded shadow p-6 hidden">
+      <h3 class="text-lg font-semibold mb-4 text-center">Editar Perfil</h3>
+      <form id="editar-form" class="grid grid-cols-1 gap-4">
+        <div>
+          <label class="block text-sm font-medium">ID:</label>
+          <input type="text" id="edit-id" class="w-full p-2 border rounded bg-gray-100" readonly>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium">Tipo de usuario:</label>
+          <select id="edit-tipo" class="w-full p-2 border rounded">
+            <option value="user">Estudiante</option>
+            <option value="admin">Profesor</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium">Nombre:</label>
+          <input type="text" id="edit-nombre" class="w-full p-2 border rounded">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium">Apellidos:</label>
+          <input type="text" id="edit-apellidos" class="w-full p-2 border rounded">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium">Email:</label>
+          <input type="email" id="edit-email" class="w-full p-2 border rounded">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium">Contraseña:</label>
+          <input type="password" id="edit-password" class="w-full p-2 border rounded">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium">Fecha de alta:</label>
+            <input type="text" id="edit-creacion" class="w-full p-2 border rounded bg-gray-100" readonly>
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Fecha modificación:</label>
+            <input type="text" id="edit-modificado" class="w-full p-2 border rounded bg-gray-100" readonly>
+          </div>
+        </div>
+
+        <div>
+          <label class="inline-flex items-center">
+            <input type="checkbox" id="edit-habilitado" class="mr-2">
+            <span class="text-sm">Habilitado</span>
+          </label>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium">ID de Rol:</label>
+          <input type="number" id="edit-rol" class="w-full p-2 border rounded">
+        </div>
+
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition w-full">Guardar cambios</button>
+      </form>
+      <p id="editar-msg" class="text-green-600 text-sm mt-3 hidden">Perfil actualizado correctamente ✅</p>
+    </div>
+
+  </main>
+
+  <footer class="bg-gray-200 text-center text-sm text-gray-600 py-4 mt-8">
+    &copy; 2025 Academia. Todos los derechos reservados.
+  </footer>
+
+  <script>
+    const token = localStorage.getItem("token");
+
+    function formatearFecha(iso) {
+      // Comprobamos si la fecha es válida
+      if (!iso) return "Fecha no disponible";
+      
+      try {
+        const fecha = new Date(iso);
+        
+        // Verificamos si la fecha es válida
+        if (isNaN(fecha.getTime())) {
+          return "Fecha inválida";
+        }
+        
+        // Formateamos la fecha para mostrarla en español
+        return fecha.toLocaleDateString("es-ES", {
+          day: "numeric",
+          month: "long",
+          year: "numeric"
+        });
+      } catch (error) {
+        console.error("Error al formatear fecha:", error);
+        return "Error en formato de fecha";
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+    }
+
+    if (token) {
+      fetch("http://localhost:8000/usuarios/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Error al obtener perfil");
+        return res.json();
+      })
+      .then(user => {
+        // Asignar nombre completo
+        const nombreCompleto = `${user.nombre || ""} ${user.apellidos || ""}`.trim();
+        document.getElementById("nombre-perfil").textContent = nombreCompleto || "Usuario";
+        
+        // Asignar email
+        document.getElementById("email-perfil").textContent = user.email || "Sin email";
+        
+        // Mostrar panel de perfil
+        document.getElementById("perfil-wrapper").classList.remove("hidden");
+        
+        // Formatear y mostrar fecha de registro
+        const fechaFormateada = formatearFecha(user.fecha_creacion);
+        document.getElementById("fecha-registro").textContent = fechaFormateada;
+        
+        // Opcional: Generar avatar con iniciales usando una API
+        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreCompleto)}&background=random&color=fff&size=128`;
+        document.getElementById("user-avatar").src = avatarUrl;
+        document.getElementById("perfil-imagen").src = avatarUrl;
+
+        // Cargar estadísticas
+        fetch(`http://localhost:8000/usuarios/${user.id}/cursos`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(cursos => {
+          document.getElementById("stat-vistos").textContent = cursos.length;
+          document.getElementById("stat-completados").textContent = cursos.filter(c => c.completado).length;
+          document.getElementById("stat-certificados").textContent = cursos.filter(c => c.certificado).length;
+          document.getElementById("stat-preguntas").textContent = cursos.reduce((total, c) => total + (c.preguntas || 0), 0);
+        })
+        .catch(err => {
+          console.error("Error al cargar estadísticas:", err);
+        });
+      })
+      .catch(err => {
+        console.error("Error al cargar perfil:", err);
+        alert("No se pudo cargar el perfil. Por favor, inicia sesión nuevamente.");
+        logout();
+      });
+
+      const perfilBtn = document.getElementById("perfil-btn");
+      const dropdown = document.getElementById("perfil-dropdown");
+      perfilBtn?.addEventListener("click", () => dropdown.classList.toggle("hidden"));
+      document.addEventListener("click", function (e) {
+        if (!perfilBtn.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.add("hidden");
+        }
+      });
+    } else {
+      window.location.href = "/login";
+    }
+
+    function activarEdicion() {
+      document.getElementById("form-editar-container").classList.remove("hidden");
+
+      fetch("http://localhost:8000/usuarios/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(user => {
+        document.getElementById("edit-id").value = user.id;
+        document.getElementById("edit-tipo").value = user.tipo;
+        document.getElementById("edit-nombre").value = user.nombre;
+        document.getElementById("edit-apellidos").value = user.apellidos;
+        document.getElementById("edit-email").value = user.email;
+        document.getElementById("edit-creacion").value = formatearFecha(user.fecha_creacion);
+        document.getElementById("edit-modificado").value = formatearFecha(user.fecha_modificacion);
+        document.getElementById("edit-habilitado").checked = user.habilitado;
+        document.getElementById("edit-rol").value = user.id_rol || 3;
+      });
+    }
+
+    document.getElementById("editar-form")?.addEventListener("submit", async e => {
+      e.preventDefault();
+
+      const datosActualizados = {
+        tipo: document.getElementById("edit-tipo").value,
+        nombre: document.getElementById("edit-nombre").value,
+        apellidos: document.getElementById("edit-apellidos").value,
+        email: document.getElementById("edit-email").value,
+        password: document.getElementById("edit-password").value,
+        habilitado: document.getElementById("edit-habilitado").checked,
+        id_rol: parseInt(document.getElementById("edit-rol").value)
+      };
+
+      if (!datosActualizados.password) delete datosActualizados.password;
+
+      const res = await fetch("http://localhost:8000/usuarios/me", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(datosActualizados)
+      });
+
+      if (res.ok) {
+        document.getElementById("editar-msg").classList.remove("hidden");
+        // Recargar página después de 1.5 segundos para ver los cambios
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        alert("Hubo un error al actualizar el perfil");
+      }
+    });
+  </script>
+</body>
+</html>

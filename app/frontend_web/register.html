@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro | Academia de Programación</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-white px-8 py-4 flex justify-between items-center border-b border-gray-200 shadow-sm">
+    <div class="text-xl font-bold text-gray-900">Academia</div>
+    <nav class="space-x-4 flex items-center" id="nav-links">
+      <a href="/" class="text-gray-800 hover:text-blue-600">Inicio</a>
+      <a href="/cursos" class="text-gray-800 hover:text-blue-600">Cursos</a>
+
+      <!-- Enlaces por defecto -->
+      <a href="/login" id="login-link" class="px-4 py-2 border border-gray-800 rounded font-semibold hover:bg-gray-100 transition">Iniciar sesión</a>
+      <a href="/register" id="register-link" class="px-4 py-2 bg-black text-white rounded font-semibold hover:bg-gray-900 transition">Registrarse</a>
+
+      <!-- Perfil -->
+      <div id="perfil-wrapper" class="relative hidden">
+        <button id="perfil-btn" class="flex items-center space-x-2 focus:outline-none">
+          <div class="w-9 h-9 bg-gray-300 rounded-full flex items-center justify-center text-white font-bold">
+            <span id="perfil-inicial">U</span>
+          </div>
+        </button>
+        <div id="perfil-dropdown" class="absolute right-0 mt-2 w-44 bg-white border rounded shadow-md hidden z-10">
+          <a href="/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mi perfil</a>
+          <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Cerrar sesión</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="text-center py-12 bg-white shadow-sm">
+    <h1 class="text-4xl font-bold mb-2">Registrarse</h1>
+    <p class="text-lg text-gray-600">Ingrese los datos para crear una cuenta</p>
+  </section>
+
+  <!-- Formulario -->
+  <main class="flex-grow container mx-auto px-4 py-8 max-w-md">
+    <form id="register-form" class="bg-white p-6 rounded shadow space-y-6">
+      <div>
+        <label for="nombre" class="block font-medium mb-1">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required class="w-full border border-gray-300 rounded px-3 py-2">
+      </div>
+
+      <div>
+        <label for="apellidos" class="block font-medium mb-1">Apellidos:</label>
+        <input type="text" id="apellidos" name="apellidos" required class="w-full border border-gray-300 rounded px-3 py-2">
+      </div>
+
+      <div>
+        <label for="email" class="block font-medium mb-1">Correo electrónico:</label>
+        <input type="email" id="email" name="email" required class="w-full border border-gray-300 rounded px-3 py-2">
+      </div>
+
+      <div>
+        <label for="password" class="block font-medium mb-1">Contraseña:</label>
+        <input type="password" id="password" name="password" required class="w-full border border-gray-300 rounded px-3 py-2">
+      </div>
+
+      <div>
+        <label for="tipo" class="block font-medium mb-1">Tipo de usuario:</label>
+        <select id="tipo" name="tipo" class="w-full border border-gray-300 rounded px-3 py-2">
+          <option value="user">Usuario</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 transition">Registrarse</button>
+    </form>
+
+    <!-- Mensaje de éxito -->
+    <div id="success-message" class="bg-green-100 border border-green-500 text-green-700 px-4 py-3 rounded mt-6 text-center font-medium hidden">
+      ¡Usuario registrado correctamente! Serás redirigido al inicio.
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-200 text-center text-sm text-gray-600 py-4 mt-auto">
+    &copy; 2025 Academia. Todos los derechos reservados.
+  </footer>
+
+  <script>
+    // Registro
+    document.getElementById('register-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const nombre = document.getElementById('nombre').value;
+      const apellidos = document.getElementById('apellidos').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const tipo = document.getElementById('tipo').value;
+
+      const userData = {
+        nombre,
+        apellidos,
+        email,
+        password,
+        tipo
+      };
+
+      const response = await fetch('http://127.0.0.1:8000/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+      });
+
+      if (response.ok) {
+        document.getElementById('success-message').classList.remove('hidden');
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Hubo un error en el registro.');
+      }
+    });
+
+    // Mostrar perfil si hay token
+    const token = localStorage.getItem("token");
+    const perfilWrapper = document.getElementById("perfil-wrapper");
+    const perfilInicial = document.getElementById("perfil-inicial");
+    const loginLink = document.getElementById("login-link");
+    const registerLink = document.getElementById("register-link");
+
+    if (token && perfilWrapper && perfilInicial) {
+      fetch("http://localhost:8000/usuarios/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Token inválido");
+        return res.json();
+      })
+      .then(user => {
+        const inicial = user.nombre?.charAt(0)?.toUpperCase() || "U";
+        perfilInicial.textContent = inicial;
+
+        perfilWrapper.classList.remove("hidden");
+        loginLink.classList.add("hidden");
+        registerLink.classList.add("hidden");
+      })
+      .catch(err => {
+        console.error("Error al validar sesión:", err);
+        logout();
+      });
+
+      const perfilBtn = document.getElementById("perfil-btn");
+      const dropdown = document.getElementById("perfil-dropdown");
+
+      perfilBtn?.addEventListener("click", () => {
+        dropdown.classList.toggle("hidden");
+      });
+
+      document.addEventListener("click", function (e) {
+        if (!perfilBtn.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.add("hidden");
+        }
+      });
+    }
+  </script>
+</body>
+</html>

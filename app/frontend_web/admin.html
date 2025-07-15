@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel de Administración - Academia de Programación</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .tab-active { 
+      color: #3b82f6; 
+      border-bottom: 2px solid #3b82f6;
+    }
+    .tab-inactive {
+      color: #6b7280;
+      border-bottom: 2px solid transparent;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+
+  <!-- Navbar simplificado -->
+  <header class="bg-white px-4 md:px-8 py-4 flex justify-between items-center border-b border-gray-200 shadow-sm sticky top-0 z-50">
+    <a href="/" class="text-2xl font-bold text-gray-900">Academia</a>
+    <div id="perfil-wrapper-desktop" class="relative">
+      <button id="perfil-btn-desktop" class="w-10 h-10 rounded-full overflow-hidden focus:outline-none border-2 border-gray-200">
+        <img src="/static/img/default-avatar.png" alt="Perfil" class="w-full h-full object-cover avatar-img">
+      </button>
+      <div id="perfil-dropdown-desktop" class="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg hidden z-10">
+        <a href="/perfil" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 auth-link">Mi perfil</a>
+        <a href="/configuracion" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 auth-link">Configuración</a>
+        <hr class="my-1">
+        <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Cerrar sesión</button>
+      </div>
+    </div>
+    <button id="mobile-menu-button" class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </header>
+
+  <div id="mobile-menu" class="md:hidden bg-white border-b border-gray-200 hidden">
+    <div id="perfil-options-mobile" class="px-4 py-4 border-t border-gray-200">
+      <a href="/perfil" class="block py-2 text-gray-800 hover:text-blue-600 auth-link">Mi perfil</a>
+      <a href="/configuracion" class="block py-2 text-gray-800 hover:text-blue-600 auth-link">Configuración</a>
+      <button onclick="logout()" class="block w-full text-left py-2 text-red-600 hover:text-red-700">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- Panel de control principal -->
+  <div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+      <div class="p-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+        <h1 class="text-2xl font-bold">Panel de Administración</h1>
+        <p class="text-blue-100">Gestión de usuarios y cursos</p>
+      </div>
+      
+      <!-- Tabs de navegación -->
+      <div class="border-b border-gray-200">
+        <div class="flex overflow-x-auto">
+          <button class="tab-button tab-active px-6 py-3 text-sm font-medium" data-tab="usuarios">
+            <i class="fas fa-users mr-2"></i>Usuarios
+          </button>
+          <button class="tab-button tab-inactive px-6 py-3 text-sm font-medium" data-tab="cursos">
+            <i class="fas fa-book mr-2"></i>Cursos
+          </button>
+        </div>
+      </div>
+      
+      <!-- Contenido de las tabs -->
+      <div class="p-6">
+        <!-- Tab de Usuarios -->
+        <div id="tab-usuarios" class="tab-content active">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold">Gestión de Usuarios</h2>
+            <div class="flex gap-2">
+              <div class="relative">
+                <input type="text" id="buscar-usuario" placeholder="Buscar usuario..." class="pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+              </div>
+              <button id="btn-crear-usuario" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition flex items-center">
+                <i class="fas fa-plus mr-2"></i>Nuevo Usuario
+              </button>
+            </div>
+          </div>
+          
+          <!-- Tabla de usuarios -->
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Apellidos</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha de creación</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-usuarios" class="divide-y divide-gray-200">
+                <!-- Los usuarios se cargarán aquí dinámicamente desde la API -->
+                <tr>
+                  <td colspan="6" class="px-6 py-4 text-center text-gray-500">Cargando usuarios...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Paginación -->
+          <div class="flex justify-between items-center mt-6">
+            <div class="text-sm text-gray-500">
+              Mostrando <span id="usuarios-desde">1</span> a <span id="usuarios-hasta">10</span> de <span id="usuarios-total">0</span> usuarios
+            </div>
+            <div class="flex space-x-2">
+              <button id="usuarios-prev" class="px-3 py-1 border rounded-md text-sm disabled:opacity-50">Anterior</button>
+              <button id="usuarios-next" class="px-3 py-1 border rounded-md text-sm bg-blue-600 text-white hover:bg-blue-700">Siguiente</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tab de Cursos -->
+        <div id="tab-cursos" class="tab-content">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold">Gestión de Cursos</h2>
+            <div class="flex gap-2">
+              <div class="relative">
+                <input type="text" id="buscar-curso" placeholder="Buscar curso..." class="pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+              </div>
+              <button id="btn-crear-curso" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition flex items-center">
+                <i class="fas fa-plus mr-2"></i>Nuevo Curso
+              </button>
+            </div>
+          </div>
+          
+          <!-- Tabla de cursos -->
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duración</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Disponible</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-cursos" class="divide-y divide-gray-200">
+                <!-- Los cursos se cargarán aquí dinámicamente desde la API -->
+                <tr>
+                  <td colspan="6" class="px-6 py-4 text-center text-gray-500">Cargando cursos...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Paginación -->
+          <div class="flex justify-between items-center mt-6">
+            <div class="text-sm text-gray-500">
+              Mostrando <span id="cursos-desde">1</span> a <span id="cursos-hasta">10</span> de <span id="cursos-total">0</span> cursos
+            </div>
+            <div class="flex space-x-2">
+              <button id="cursos-prev" class="px-3 py-1 border rounded-md text-sm disabled:opacity-50">Anterior</button>
+              <button id="cursos-next" class="px-3 py-1 border rounded-md text-sm bg-blue-600 text-white hover:bg-blue-700">Siguiente</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para crear/editar usuario -->
+  <div id="modal-form-usuario" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
+      <div class="p-6 border-b flex justify-between items-center">
+        <h3 class="text-xl font-bold" id="modal-form-usuario-titulo">Crear Nuevo Usuario</h3>
+        <button class="modal-close text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="p-6">
+        <form id="form-usuario">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label for="usuario-nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+              <input type="text" id="usuario-nombre" name="nombre" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+            <div>
+              <label for="usuario-apellidos" class="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
+              <input type="text" id="usuario-apellidos" name="apellidos" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="usuario-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input type="email" id="usuario-email" name="email" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label for="usuario-password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+              <input type="password" id="usuario-password" name="password" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <p class="text-xs text-gray-500 mt-1">Dejar en blanco para mantener la contraseña actual (en caso de edición)</p>
+            </div>
+            <div>
+              <label for="usuario-rol" class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+              <select id="usuario-rol" name="rol" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="usuario">Usuario</option>
+                <option value="administrador">Administrador</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+            <div class="flex items-center space-x-4">
+              <label class="inline-flex items-center">
+                <input type="radio" name="estado" value="activo" class="form-radio text-blue-600" checked>
+                <span class="ml-2">Activo</span>
+              </label>
+              <label class="inline-flex items-center">
+                <input type="radio" name="estado" value="inactivo" class="form-radio text-blue-600">
+                <span class="ml-2">Inactivo</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="border-t pt-4 mt-4 flex justify-end space-x-3">
+            <button type="button" class="modal-close px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Cancelar</button>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">Guardar Usuario</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para crear/editar curso -->
+  <div id="modal-form-curso" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
+      <div class="p-6 border-b flex justify-between items-center">
+        <h3 class="text-xl font-bold" id="modal-form-curso-titulo">Crear Nuevo Curso</h3>
+        <button class="modal-close text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="p-6">
+        <form id="form-curso">
+          <div class="mb-4">
+            <label for="curso-nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre del curso</label>
+            <input type="text" id="curso-nombre" name="nombre" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+          </div>
+          
+          <div class="mb-4">
+            <label for="curso-descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+            <textarea id="curso-descripcion" name="descripcion" rows="3" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required></textarea>
+          </div>
+          
+          <div class="mb-4">
+            <label for="curso-duracion" class="block text-sm font-medium text-gray-700 mb-1">Duración (horas)</label>
+            <input type="number" id="curso-duracion" name="duracion" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Disponible</label>
+            <div class="flex items-center space-x-4">
+              <label class="inline-flex items-center">
+                <input type="radio" name="estado" value="activo" class="form-radio text-blue-600" checked>
+                <span class="ml-2">Sí</span>
+              </label>
+              <label class="inline-flex items-center">
+                <input type="radio" name="estado" value="inactivo" class="form-radio text-blue-600">
+                <span class="ml-2">No</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="border-t pt-4 mt-4 flex justify-end space-x-3">
+            <button type="button" class="modal-close px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Cancelar</button>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">Guardar Curso</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Definición de la URL de la API
+    const API_URL = "http://localhost:8000";
+    
+    // Variables para la paginación
+    let paginaActualUsuarios = 1;
+    let usuariosPorPagina = 10;
+    let totalUsuarios = 0;
+    let todosLosUsuarios = [];
+
+    // ==========================================
+    // FUNCIONES AUXILIARES
+    // ==========================================
+
+    function getToken() {
+      return localStorage.getItem("token");
+    }
+
+    function handleApiError(response) {
+      if (!response.ok) {
+        if (response.status === 401) {
+          logout();
+          throw new Error('Sesión expirada. Por favor, inicie sesión nuevamente.');
+        }
+        return response.json().then(err => {
+          throw new Error(err.message || `Error: ${response.status}`);
+        });
+      }
+      return response.json();
+    }
+
+    function logout() {
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("remember_session");
+      window.location.href = '/';
+    }
+
+    function mostrarNotificacion(mensaje, tipo = 'success') {
+      const noti = document.createElement('div');
+      noti.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm text-white ${
+        tipo === 'success' ? 'bg-green-500' :
+        tipo === 'error' ? 'bg-red-500' : 'bg-blue-500'
+      }`;
+      noti.textContent = mensaje;
+      document.body.appendChild(noti);
+      setTimeout(() => document.body.removeChild(noti), 3000);
+    }
+
+    function cerrarModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // Verificar sesión y actualizar imagen del avatar
+    const token = getToken();
+    if (token) {
+      fetch(`${API_URL}/usuarios/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Error de autenticación');
+        return res.json();
+      })
+      .then(user => {
+        const avatarImgs = document.querySelectorAll('.avatar-img');
+        avatarImgs.forEach(img => {
+          if (user.imagen_perfil) {
+            img.src = user.imagen_perfil;
+          } else {
+            const nombre = encodeURIComponent(user.nombre || 'Usuario');
+            img.src = `https://ui-avatars.com/api/?name=${nombre}&background=random&color=fff`;
+          }
+        });
+      })
+      .catch(err => {
+        console.error('Error al obtener perfil del usuario:', err.message);
+      });
+    }
+
+    // ==========================================
+    // FUNCIONES DE NAVEGACIÓN POR TABS
+    // ==========================================
+
+    function setupTabs() {
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const tabName = button.getAttribute('data-tab');
+          
+          // Desactivar todas las tabs
+          tabButtons.forEach(btn => btn.classList.remove('tab-active'));
+          tabButtons.forEach(btn => btn.classList.add('tab-inactive'));
+          tabContents.forEach(content => content.classList.remove('active'));
+          
+          // Activar la tab seleccionada
+          button.classList.add('tab-active');
+          button.classList.remove('tab-inactive');
+          document.getElementById(`tab-${tabName}`).classList.add('active');
+        });
+      });
+    }
+
+    // ==========================================
+    // FUNCIONES DE GESTIÓN DE USUARIOS
+    // ==========================================
+
+    // Función para cargar usuarios
+    function cargarUsuarios() {
+      const token = getToken();
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      // Mostrar mensaje de carga
+      document.getElementById('tabla-usuarios').innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Cargando usuarios...</td></tr>';
+
+      // Verificar autenticación y obtener los usuarios
+      fetch(`${API_URL}/usuarios/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => {
+        if (!res.ok) {
+          if (res.status === 401) {
+            logout();
+            throw new Error('Sesión expirada. Por favor, inicie sesión nuevamente.');
+          }
+          return res.json().then(err => {
+            throw new Error(err.message || 'Error al verificar autenticación');
+          });
+        }
+        return res.json();
+      })
+      .then(() => {
+        return fetch(`${API_URL}/usuarios/solo-usuarios`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+      })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Error al obtener usuarios');
+        }
+        return res.json();
+      })
+      .then(usuarios => {
+        // Mostrar solo usuarios con id_rol === 3 (usuarios normales)
+        const usuariosNormales = usuarios.filter(usuario => usuario.id_rol === 3);
+
+        // Guardar todos los usuarios para la paginación
+        todosLosUsuarios = usuariosNormales;
+        totalUsuarios = usuariosNormales.length;
+
+        // Mostrar la página actual
+        mostrarPaginaUsuarios(paginaActualUsuarios);
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        document.getElementById('tabla-usuarios').innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error al cargar usuarios: ' + err.message + '</td></tr>';
+        mostrarNotificacion(err.message, 'error');
+      });
+    }
+
+    // Función para mostrar una página específica de usuarios
+    function mostrarPaginaUsuarios(pagina) {
+      // Calcular índices de inicio y fin para la página actual
+      const inicio = (pagina - 1) * usuariosPorPagina;
+      const fin = Math.min(inicio + usuariosPorPagina, totalUsuarios);
+      
+      // Obtener los usuarios para esta página
+      const usuariosPagina = todosLosUsuarios.slice(inicio, fin);
+      
+      // Actualizar la tabla de usuarios
+      const tablaUsuarios = document.getElementById('tabla-usuarios');
+      
+      if (!usuariosPagina || usuariosPagina.length === 0) {
+        tablaUsuarios.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No hay usuarios registrados</td></tr>';
+        return;
+      }
+      
+      tablaUsuarios.innerHTML = usuariosPagina.map(usuario => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${usuario.id}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${usuario.nombre || 'N/A'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${usuario.apellidos || 'N/A'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${usuario.email || 'Sin email'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${usuario.fecha_creacion ? new Date(usuario.fecha_creacion).toLocaleDateString() : 'N/A'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${usuario.habilitado ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+              ${usuario.habilitado ? 'Habilitado' : 'Deshabilitado'}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+      
+      // Actualizar contador de usuarios
+      document.getElementById('usuarios-total').textContent = totalUsuarios;
+      document.getElementById('usuarios-desde').textContent = inicio + 1;
+      document.getElementById('usuarios-hasta').textContent = fin;
+      
+      // Actualizar estado de los botones de paginación
+      document.getElementById('usuarios-prev').disabled = pagina === 1;
+      document.getElementById('usuarios-next').disabled = fin >= totalUsuarios;
+    }
+
+    // Función para cambiar el estado de un usuario
+    function cambiarEstadoUsuario(userId, nuevoEstado) {
+      const token = getToken();
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      fetch(`${API_URL}/usuarios/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ habilitado: nuevoEstado })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Error al cambiar el estado del usuario');
+        return res.json();
+      })
+      .then(() => {
+        mostrarNotificacion(`Usuario ${nuevoEstado ? 'habilitado' : 'deshabilitado'} correctamente`, 'success');
+        cargarUsuarios(); // recargar usuarios actualizados
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        mostrarNotificacion(err.message, 'error');
+      });
+    }
+
+    // Función para editar un usuario
+    function editarUsuario(userId) {
+      const token = getToken();
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      // Cambiar el título del modal
+      document.getElementById('modal-form-usuario-titulo').textContent = 'Editar Usuario';
+      
+      // Limpiar el formulario
+      document.getElementById('form-usuario').reset();
+      
+      // Cargar los datos del usuario
+      fetch(`${API_URL}/usuarios/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Error al cargar los datos del usuario');
+        return res.json();
+      })
+      .then(usuario => {
+        // Rellenar el formulario con los datos del usuario
+        document.getElementById('usuario-nombre').value = usuario.nombre || '';
+        document.getElementById('usuario-apellidos').value = usuario.apellidos || '';
+        document.getElementById('usuario-email').value = usuario.email || '';
+        document.getElementById('usuario-rol').value = usuario.rol || 'usuario';
+        
+        // Estado
+        const radioActivo = document.querySelector('input[name="estado"][value="activo"]');
+        const radioInactivo = document.querySelector('input[name="estado"][value="inactivo"]');
+        if (usuario.activo) {
+          radioActivo.checked = true;
+        } else {
+          radioInactivo.checked = true;
+        }
+        
+        // Mostrar el modal
+        document.getElementById('modal-form-usuario').classList.remove('hidden');
+        
+        // Configurar el formulario para editar
+        const form = document.getElementById('form-usuario');
+        form.onsubmit = function(e) {
+          e.preventDefault();
+          
+          // Recoger los datos del formulario
+          const formData = new FormData(form);
+          const userData = {
+            nombre: formData.get('nombre'),
+            apellidos: formData.get('apellidos'),
+            email: formData.get('email'),
+            rol: formData.get('rol'),
+            activo: formData.get('estado') === 'activo'
+          };
+          
+          // Si hay contraseña, añadirla
+          if (formData.get('password')) {
+            userData.password = formData.get('password');
+          }
+          
+          // Enviar los datos al servidor
+          fetch(`${API_URL}/usuarios/${userId}`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(userData)
+          })
+          .then(res => {
+            if (!res.ok) throw new Error('Error al actualizar el usuario');
+            return res.json();
+          })
+          .then(data => {
+            mostrarNotificacion('Usuario actualizado correctamente', 'success');
+            cerrarModal('modal-form-usuario');
+            cargarUsuarios(); // Recargar la lista de usuarios
+          })
+          .catch(err => {
+            console.error('Error:', err);
+            mostrarNotificacion(err.message, 'error');
+          });
+        };
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        mostrarNotificacion(err.message, 'error');
+      });
+    }
+
+    // Función para crear un nuevo usuario
+    function crearUsuario() {
+      // Cambiar el título del modal
+      document.getElementById('modal-form-usuario-titulo').textContent = 'Crear Nuevo Usuario';
+      
+      // Limpiar el formulario
+      document.getElementById('form-usuario').reset();
+      
+      // Mostrar el modal
+      document.getElementById('modal-form-usuario').classList.remove('hidden');
+      
+      // Configurar el formulario para crear
+      const form = document.getElementById('form-usuario');
+      form.onsubmit = function(e) {
+        e.preventDefault();
+        
+        const token = getToken();
+        if (!token) {
+          window.location.href = '/login';
+          return;
+        }
+        
+        // Recoger los datos del formulario
+        const formData = new FormData(form);
+        const userData = {
+          nombre: formData.get('nombre'),
+          apellidos: formData.get('apellidos'),
+          email: formData.get('email'),
+          password: formData.get('password'),
+          rol: formData.get('rol'),
+          activo: formData.get('estado') === 'activo'
+        };
+        
+        // Enviar los datos al servidor
+        fetch(`${API_URL}/usuarios`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(userData)
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('Error al crear el usuario');
+          return res.json();
+        })
+        .then(data => {
+          mostrarNotificacion('Usuario creado correctamente', 'success');
+          cerrarModal('modal-form-usuario');
+          cargarUsuarios(); // Recargar la lista de usuarios
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          mostrarNotificacion(err.message, 'error');
+        });
+      };
+    }
+
+    // ==========================================
+    // FUNCIONES DE GESTIÓN DE CURSOS
+    // ==========================================
+
+    // Función para cargar cursos
+    function cargarCursos() {
+      const token = getToken();
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      // Mostrar mensaje de carga
+      document.getElementById('tabla-cursos').innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Cargando cursos...</td></tr>';
+      
+      fetch(`${API_URL}/cursos`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Error al cargar cursos');
+        return res.json();
+      })
+      .then(cursos => {
+        // Actualizar la tabla de cursos
+        const tablaCursos = document.getElementById('tabla-cursos');
+        
+        if (!cursos || cursos.length === 0) {
+          tablaCursos.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No hay cursos registrados</td></tr>';
+          return;
+        }
+        
+        tablaCursos.innerHTML = cursos.map(curso => `
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${curso.id}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${curso.nombre}</td>
+            <td class="px-6 py-4 text-sm text-gray-500">${curso.descripcion || 'Sin descripción'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${curso.duracion || 'N/A'}</td>
+
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${curso.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                ${curso.activo ? 'Sí' : 'No'}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <button onclick="editarCurso(${curso.id})" class="text-indigo-600 hover:text-indigo-900" title="Editar curso">
+                <i class="fas fa-edit"></i>
+              </button>
+            </td>
+          </tr>
+        `).join('');
+        
+        // Actualizar contador de cursos
+        document.getElementById('cursos-total').textContent = cursos.length;
+        document.getElementById('cursos-desde').textContent = '1';
+        document.getElementById('cursos-hasta').textContent = Math.min(10, cursos.length);
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        document.getElementById('tabla-cursos').innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error al cargar cursos: ' + err.message + '</td></tr>';
+        mostrarNotificacion(err.message, 'error');
+      });
+    }
+
+    // Función para eliminar un curso
+    function eliminarCurso(cursoId) {
+      const token = getToken();
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      if (!confirm('¿Estás seguro de que quieres eliminar este curso? Esta acción no se puede deshacer.')) {
+        return;
+      }
+
+      fetch(`${API_URL}/cursos/${cursoId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Error al eliminar el curso');
+        return res.json();
+      })
+      .then(() => {
+        mostrarNotificacion('Curso eliminado correctamente', 'success');
+        cargarCursos(); // Recargar la tabla
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        mostrarNotificacion(err.message, 'error');
+      });
+    }
+
+    // Función para editar un curso
+    function editarCurso(cursoId) {
+      const token = getToken();
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      // Cambiar el título del modal
+      document.getElementById('modal-form-curso-titulo').textContent = 'Editar Curso';
+      
+      // Limpiar el formulario
+      document.getElementById('form-curso').reset();
+      
+      // Cargar los datos del curso
+      fetch(`${API_URL}/cursos/${cursoId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Error al cargar los datos del curso');
+        return res.json();
+      })
+      .then(curso => {
+        // Rellenar el formulario con los datos del curso
+        document.getElementById('curso-nombre').value = curso.nombre || '';
+        document.getElementById('curso-descripcion').value = curso.descripcion || '';
+        document.getElementById('curso-duracion').value = curso.duracion || '';
+        
+        // Estado
+        const radioActivo = document.querySelector('input[name="estado"][value="activo"]');
+        const radioInactivo = document.querySelector('input[name="estado"][value="inactivo"]');
+        if (curso.activo) {
+          radioActivo.checked = true;
+        } else {
+          radioInactivo.checked = true;
+        }
+        
+        // Mostrar el modal
+        document.getElementById('modal-form-curso').classList.remove('hidden');
+        
+        // Configurar el formulario para editar
+        const form = document.getElementById('form-curso');
+        form.onsubmit = function(e) {
+          e.preventDefault();
+          
+          // Recoger los datos del formulario
+          const formData = new FormData(form);
+          const cursoData = {
+            nombre: formData.get('nombre'),
+            descripcion: formData.get('descripcion'),
+            duracion: formData.get('duracion'),
+            activo: formData.get('estado') === 'activo'
+          };
+          
+          // Enviar los datos al servidor
+          fetch(`${API_URL}/cursos/${cursoId}`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(cursoData)
+          })
+          .then(res => {
+            if (!res.ok) throw new Error('Error al actualizar el curso');
+            return res.json();
+          })
+          .then(data => {
+            mostrarNotificacion('Curso actualizado correctamente', 'success');
+            cerrarModal('modal-form-curso');
+            cargarCursos(); // Recargar la lista de cursos
+          })
+          .catch(err => {
+            console.error('Error:', err);
+            mostrarNotificacion(err.message, 'error');
+          });
+        };
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        mostrarNotificacion(err.message, 'error');
+      });
+    }
+
+    // Función para cambiar el estado de un curso
+    function cambiarEstadoCurso(cursoId, accion) {
+      const token = getToken();
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      // Confirmar la acción
+      if (!confirm(`¿Estás seguro de que quieres ${accion} este curso?`)) {
+        return;
+      }
+      
+      const nuevoEstado = accion === 'activar';
+      
+      fetch(`${API_URL}/cursos/${cursoId}/estado`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ activo: nuevoEstado })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error(`Error al ${accion} el curso`);
+        return res.json();
+      })
+      .then(data => {
+        mostrarNotificacion(`Curso ${nuevoEstado ? 'activado' : 'desactivado'} correctamente`, 'success');
+        cargarCursos(); // Recargar la lista de cursos
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        mostrarNotificacion(err.message, 'error');
+      });
+    }
+
+    // Función para crear un nuevo curso
+    function crearCurso() {
+      // Cambiar el título del modal
+      document.getElementById('modal-form-curso-titulo').textContent = 'Crear Nuevo Curso';
+      
+      // Limpiar el formulario
+      document.getElementById('form-curso').reset();
+      
+      // Mostrar el modal
+      document.getElementById('modal-form-curso').classList.remove('hidden');
+      
+      // Configurar el formulario para crear
+      const form = document.getElementById('form-curso');
+      form.onsubmit = function(e) {
+        e.preventDefault();
+        
+        const token = getToken();
+        if (!token) {
+          window.location.href = '/login';
+          return;
+        }
+        
+        // Recoger los datos del formulario
+        const formData = new FormData(form);
+        const cursoData = {
+          nombre: formData.get('nombre'),
+          descripcion: formData.get('descripcion'),
+          duracion: formData.get('duracion'),
+          activo: formData.get('estado') === 'activo'
+        };
+        
+        // Enviar los datos al servidor
+        fetch(`${API_URL}/cursos`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(cursoData)
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('Error al crear el curso');
+          return res.json();
+        })
+        .then(data => {
+          mostrarNotificacion('Curso creado correctamente', 'success');
+          cerrarModal('modal-form-curso');
+          cargarCursos(); // Recargar la lista de cursos
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          mostrarNotificacion(err.message, 'error');
+        });
+      };
+    }
+
+    // ==========================================
+    // CONFIGURACIÓN DE MODALES Y EVENTOS
+    // ==========================================
+
+    // Función para configurar los botones de cierre de modales
+    function setupModales() {
+      // Configurar todos los botones con la clase modal-close
+      document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', function() {
+          // Buscar el modal padre
+          const modal = this.closest('[id^="modal-"]');
+          if (modal) {
+            modal.classList.add('hidden');
+          }
+        });
+      });
+      
+      // Configurar el botón de crear usuario
+      document.getElementById('btn-crear-usuario').addEventListener('click', crearUsuario);
+      
+      // Configurar el botón de crear curso
+      document.getElementById('btn-crear-curso').addEventListener('click', crearCurso);
+      
+      // Cerrar modal al hacer clic fuera
+      document.querySelectorAll('[id^="modal-"]').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            this.classList.add('hidden');
+          }
+        });
+      });
+    }
+
+    // ==========================================
+    // INICIALIZACIÓN
+    // ==========================================
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Configurar las tabs
+      setupTabs();
+      
+      // Configurar los modales
+      setupModales();
+      
+      // Cargar datos iniciales
+      cargarUsuarios();
+      cargarCursos();
+      
+      // Funcionalidad del menú móvil
+      document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenu.classList.toggle('hidden');
+      });
+
+      // Funcionalidad del dropdown de perfil en desktop
+      document.getElementById('perfil-btn-desktop')?.addEventListener('click', function() {
+        const dropdown = document.getElementById('perfil-dropdown-desktop');
+        dropdown.classList.toggle('hidden');
+      });
+
+      // Cerrar dropdown al hacer clic fuera
+      document.addEventListener('click', function(e) {
+        const perfilBtn = document.getElementById('perfil-btn-desktop');
+        const dropdown = document.getElementById('perfil-dropdown-desktop');
+        
+        if (perfilBtn && dropdown && !perfilBtn.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.add('hidden');
+        }
+      });
+      
+      // Configurar botones de paginación
+      document.getElementById('usuarios-prev').addEventListener('click', function() {
+        if (paginaActualUsuarios > 1) {
+          paginaActualUsuarios--;
+          mostrarPaginaUsuarios(paginaActualUsuarios);
+        }
+      });
+      
+      document.getElementById('usuarios-next').addEventListener('click', function() {
+        const totalPaginas = Math.ceil(totalUsuarios / usuariosPorPagina);
+        if (paginaActualUsuarios < totalPaginas) {
+          paginaActualUsuarios++;
+          mostrarPaginaUsuarios(paginaActualUsuarios);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

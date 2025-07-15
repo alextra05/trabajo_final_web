@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mis Cursos | Academia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background-color: #3b82f6;
+      border-radius: 4px;
+    }
+    .curso-card {
+      transition: all 0.3s ease;
+    }
+    .curso-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .curso-card.fade-out {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .notification {
+      transition: all 0.3s ease;
+    }
+    .notification.hide {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-white px-4 md:px-8 py-4 flex justify-between items-center border-b border-gray-200 shadow-sm sticky top-0 z-50">
+    <a href="/" class="text-2xl font-bold text-gray-900">Academia</a>
+    <div class="hidden md:flex items-center gap-8">
+      <nav class="flex items-center space-x-6">
+        <a href="/#cursos" class="text-gray-800 hover:text-blue-600 font-medium">Cursos</a>
+      </nav>
+      <div class="flex items-center space-x-4" id="auth-buttons-desktop">
+        <a href="/login" class="px-4 py-2 border border-gray-300 rounded-md font-medium hover:bg-gray-50 transition">Iniciar sesión</a>
+        <a href="/register" class="px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition">Registrarse</a>
+      </div>
+      <div id="perfil-wrapper-desktop" class="relative hidden">
+        <button id="perfil-btn-desktop" class="w-10 h-10 rounded-full overflow-hidden focus:outline-none border-2 border-gray-200">
+          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Perfil" class="w-full h-full object-cover avatar-img">
+        </button>
+        <div id="perfil-dropdown-desktop" class="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg hidden z-10">
+          <a href="/perfil" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 auth-link">Mi perfil</a>
+          <a href="/mis-cursos" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 auth-link">Mis cursos</a>
+          <a href="/configuracion" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 auth-link">Configuración</a>
+          <hr class="my-1">
+          <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Cerrar sesión</button>
+        </div>
+      </div>
+    </div>
+    <button id="mobile-menu-button" class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </header>
+  
+  <div id="mobile-menu" class="md:hidden bg-white border-b border-gray-200 hidden">
+    <nav class="flex flex-col px-4 py-2">
+      <a href="/#cursos" class="py-2 text-gray-800 hover:text-blue-600">Cursos</a>
+    </nav>
+    <div class="px-4 py-4 border-t border-gray-200" id="auth-buttons-mobile">
+      <a href="/login" class="block w-full text-center mb-2 px-4 py-2 border border-gray-300 rounded-md font-medium hover:bg-gray-50 transition">Iniciar sesión</a>
+      <a href="/register" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition">Registrarse</a>
+    </div>
+    <div id="perfil-options-mobile" class="px-4 py-4 border-t border-gray-200 hidden">
+      <a href="/perfil" class="block py-2 text-gray-800 hover:text-blue-600 auth-link">Mi perfil</a>
+      <a href="/mis-cursos" class="block py-2 text-gray-800 hover:text-blue-600 auth-link">Mis cursos</a>
+      <a href="/configuracion" class="block py-2 text-gray-800 hover:text-blue-600 auth-link">Configuración</a>
+      <button onclick="logout()" class="block w-full text-left py-2 text-red-600 hover:text-red-700">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16">
+    <div class="container mx-auto px-4">
+      <div class="max-w-3xl mx-auto text-center">
+        <h1 class="text-4xl font-bold mb-4">Mis Cursos</h1>
+        <p class="text-xl text-blue-100">
+          Aquí encontrarás todos los cursos en los que estás inscrito. 
+          <span class="font-semibold">Cursos vistos: 0</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main -->
+  <main class="py-12 flex-grow">
+    <div class="container mx-auto px-4">
+      <div class="mb-6 flex justify-between items-center">
+        <a href="/" class="text-blue-600 hover:underline flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+          </svg>
+          Volver a inicio
+        </a>
+      </div>
+
+      <!-- Estados de carga -->
+      <div id="loading" class="text-center py-10">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-4"></div>
+        <p class="text-gray-600">Cargando tus cursos...</p>
+      </div>
+      
+      <div id="error-message" class="hidden text-center py-12 bg-white rounded-lg shadow text-red-600">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h2 class="text-xl font-semibold mb-2" id="error-title">Ha ocurrido un error</h2>
+        <p class="text-gray-600 mb-6" id="error-detail">No se pudieron cargar tus cursos.</p>
+        <button onclick="location.reload()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+          Reintentar
+        </button>
+      </div>
+      
+      <!-- Sin cursos -->
+      <div id="no-cursos" class="hidden text-center py-10">
+        <div class="bg-white p-8 rounded-lg shadow-md max-w-xl mx-auto">
+          <div class="text-gray-400 text-7xl mb-4">
+            <i class="fas fa-book-open"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">Aún no tienes cursos</h2>
+          <p class="text-gray-600 mb-6">Parece que aún no te has inscrito en ningún curso. Explora nuestro catálogo y encuentra el curso perfecto para ti.</p>
+          <a href="/#cursos" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition inline-flex items-center">
+            Explorar cursos
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+        </div>
+      </div>
+      
+      <!-- Lista de cursos -->
+      <div id="mis-cursos-container" class="hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="cursos-grid">
+          <!-- Aquí se cargarán dinámicamente los cursos -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal de confirmación de cancelación -->
+  <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg w-96 p-6 shadow-lg">
+      <h3 class="text-lg font-bold mb-4">Confirmar cancelación</h3>
+      <p class="mb-6">¿Estás seguro de que deseas cancelar tu inscripción a este curso?</p>
+      <div class="flex justify-end space-x-3">
+        <button id="cancel-btn" class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-100">
+          Cancelar
+        </button>
+        <button id="confirm-btn" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+          Sí, cancelar inscripción
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 text-slate-400 py-12 mt-auto">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <h3 class="text-white text-lg font-bold mb-4">Academia</h3>
+          <p class="mb-4">Formamos a los desarrolladores del futuro con cursos de alta calidad impartidos por expertos de la industria.</p>
+          <div class="flex space-x-4">
+            <a href="#" class="text-slate-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="text-slate-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="text-slate-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="text-slate-400 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-white text-lg font-bold mb-4">Enlaces rápidos</h3>
+          <ul class="space-y-2">
+            <li><a href="/" class="hover:text-white transition">Inicio</a></li>
+            <li><a href="/#cursos" class="hover:text-white transition">Cursos</a></li>
+            <li><a href="/contacto" class="hover:text-white transition">Contacto</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-white text-lg font-bold mb-4">Categorías</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-white transition">Frontend</a></li>
+            <li><a href="#" class="hover:text-white transition">Backend</a></li>
+            <li><a href="#" class="hover:text-white transition">Full Stack</a></li>
+            <li><a href="#" class="hover:text-white transition">Mobile</a></li>
+            <li><a href="#" class="hover:text-white transition">DevOps</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-white text-lg font-bold mb-4">Contacto</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start"><i class="fas fa-map-marker-alt mr-2 mt-1"></i><span>Calle Principal 123, Ciudad</span></li>
+            <li class="flex items-start"><i class="fas fa-envelope mr-2 mt-1"></i><span>info@academia.com</span></li>
+            <li class="flex items-start"><i class="fas fa-phone-alt mr-2 mt-1"></i><span>+34 123 456 789</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-slate-800 mt-12 pt-8 text-center">
+        <p>&copy; 2025 Academia. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Definición de la URL de la API
+    const API_URL = "http://localhost:8000";
+
+    // ==========================================
+    // FUNCIONES AUXILIARES
+    // ==========================================
+
+    function getToken() {
+      return localStorage.getItem("token");
+    }
+
+    function logout() {
+      // Eliminar el token de localStorage
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("remember_session");
+      // Redirigir a la página principal
+      window.location.href = '/';
+    }
+
+    function mostrarNotificacion(mensaje, tipo = 'success') {
+      const noti = document.createElement('div');
+      noti.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm text-white ${
+        tipo === 'success' ? 'bg-green-500' :
+        tipo === 'error' ? 'bg-red-500' : 'bg-blue-500'
+      }`;
+      noti.textContent = mensaje;
+      document.body.appendChild(noti);
+      setTimeout(() => document.body.removeChild(noti), 3000);
+    }
+
+    // ==========================================
+    // FUNCIÓN DE VERIFICACIÓN DE SESIÓN
+    // ==========================================
+
+    // Verificar si hay sesión activa
+    function checkSession() {
+      const token = getToken();
+      
+      if (!token) {
+        console.log('No hay token almacenado');
+        // Asegurarse de que los botones de autenticación estén visibles
+        document.getElementById('auth-buttons-desktop')?.classList.remove('hidden');
+        document.getElementById('auth-buttons-mobile')?.classList.remove('hidden');
+        document.getElementById('perfil-wrapper-desktop')?.classList.add('hidden');
+        document.getElementById('perfil-options-mobile')?.classList.add('hidden');
+        
+        // También actualizar los elementos de la barra de navegación principal si existen
+        document.getElementById('login-link')?.classList.remove('hidden');
+        document.getElementById('register-link')?.classList.remove('hidden');
+        document.getElementById('perfil-wrapper')?.classList.add('hidden');
+        return;
+      }
+      
+      // Realizamos la petición al backend para obtener los datos del usuario
+      fetch(`${API_URL}/usuarios/me`, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('No hay sesión activa');
+        return res.json();
+      })
+      .then(user => {
+        console.log('Usuario autenticado:', user);
+        
+        // Mostrar elementos de perfil y ocultar botones de autenticación
+        const authButtonsDesktop = document.getElementById('auth-buttons-desktop');
+        const authButtonsMobile = document.getElementById('auth-buttons-mobile');
+        const perfilWrapperDesktop = document.getElementById('perfil-wrapper-desktop');
+        const perfilOptionsMobile = document.getElementById('perfil-options-mobile');
+        
+        if (authButtonsDesktop) authButtonsDesktop.classList.add('hidden');
+        if (authButtonsMobile) authButtonsMobile.classList.add('hidden');
+        if (perfilWrapperDesktop) perfilWrapperDesktop.classList.remove('hidden');
+        if (perfilOptionsMobile) perfilOptionsMobile.classList.remove('hidden');
+        
+        // También actualizar los elementos de la barra de navegación principal si existen
+        const loginLink = document.getElementById('login-link');
+        const registerLink = document.getElementById('register-link');
+        const perfilWrapper = document.getElementById('perfil-wrapper');
+        
+        if (loginLink) loginLink.classList.add('hidden');
+        if (registerLink) registerLink.classList.add('hidden');
+        if (perfilWrapper) perfilWrapper.classList.remove('hidden');
+        
+        // Actualizar la inicial del perfil si existe
+        const perfilInicial = document.getElementById('perfil-inicial');
+        if (perfilInicial && user.nombre) {
+          perfilInicial.textContent = user.nombre.charAt(0).toUpperCase();
+        }
+        
+        // Actualizar la imagen de perfil con la inicial del usuario si no hay imagen
+        const avatarImgs = document.querySelectorAll('.avatar-img');
+        avatarImgs.forEach(img => {
+          // Si hay una URL de imagen de perfil en el usuario, usarla
+          if (user.imagen_perfil) {
+            img.src = user.imagen_perfil;
+          } else {
+            // Si no hay imagen, generar un avatar con la inicial del usuario
+            const nombre = encodeURIComponent(user.nombre || 'Usuario');
+            img.src = `https://ui-avatars.com/api/?name=${nombre}&background=random&color=fff`;
+          }
+        });
+      })
+      .catch(err => {
+        console.log('Error de sesión:', err.message);
+        // Si hay error, limpiar el token
+        localStorage.removeItem("token");
+        // Asegurarse de que los botones de autenticación estén visibles
+        document.getElementById('auth-buttons-desktop')?.classList.remove('hidden');
+        document.getElementById('auth-buttons-mobile')?.classList.remove('hidden');
+        document.getElementById('perfil-wrapper-desktop')?.classList.add('hidden');
+        document.getElementById('perfil-options-mobile')?.classList.add('hidden');
+        
+        // También actualizar los elementos de la barra de navegación principal si existen
+        document.getElementById('login-link')?.classList.remove('hidden');
+        document.getElementById('register-link')?.classList.remove('hidden');
+        document.getElementById('perfil-wrapper')?.classList.add('hidden');
+      });
+    }
+
+    // ==========================================
+    // CARGAR MIS CURSOS
+    // ==========================================
+
+    function loadMisCursos() {
+      const token = getToken();
+      if (!token) {
+        // Si no hay token, mostrar mensaje de error
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('no-cursos').classList.remove('hidden');
+        mostrarNotificacion('Debes iniciar sesión para ver tus cursos', 'error');
+        return;
+      }
+
+      fetch(`${API_URL}/usuarios/mis-cursos`, {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Error al obtener tus cursos');
+        return res.json();
+      })
+      .then(cursos => {
+        document.getElementById('loading').classList.add('hidden');
+
+        if (!cursos || cursos.length === 0) {
+          document.getElementById('no-cursos').classList.remove('hidden');
+          return;
+        }
+
+        document.getElementById('mis-cursos-container').classList.remove('hidden');
+
+        const cursosGrid = document.getElementById('cursos-grid');
+        cursosGrid.innerHTML = cursos.map(curso => `
+          <div class="curso-card bg-white rounded-xl shadow-md overflow-hidden" data-id="${curso.id}">
+            <div class="h-48 bg-gray-200 relative">
+              ${curso.imagen 
+                ? `<img src="${curso.imagen}" alt="${curso.nombre}" class="w-full h-full object-cover">`
+                : `<div class="w-full h-full flex items-center justify-center text-gray-400">
+                     <i class="fas fa-laptop-code text-4xl"></i>
+                   </div>`}
+              <span class="badge bg-green-100 text-green-800">Inscrito</span>
+            </div>
+            <div class="p-6">
+              <h3 class="font-bold text-xl mb-3">${curso.nombre}</h3>
+              <p class="text-gray-600 mb-6 line-clamp-2">${curso.descripcion || 'Sin descripción'}</p>
+              <div class="flex gap-2">
+                <a href="/curso/${curso.id}" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition text-center">
+                  Ver curso
+                </a>
+                <button onclick="mostrarConfirmacion(${curso.id})" class="p-2 border border-red-300 text-red-600 rounded-md hover:bg-red-50 transition">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      })
+      .catch(err => {
+        console.error('Error al obtener cursos:', err);
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('error-message').classList.remove('hidden');
+        document.getElementById('error-detail').textContent = 'No se pudieron cargar tus cursos. Por favor, intenta de nuevo más tarde.';
+      });
+    }
+
+    // ==========================================
+    // FUNCIÓN PARA MANEJAR CANCELACIÓN DE INSCRIPCIÓN
+    // ==========================================
+
+    window.cursoIdToCancel = null;
+
+    function mostrarConfirmacion(cursoId) {
+      window.cursoIdToCancel = cursoId;
+      document.getElementById("confirm-modal").classList.remove("hidden");
+    }
+
+    function cancelarInscripcion(cursoId) {
+      const token = getToken();
+      
+      fetch(`${API_URL}/usuarios/cursos/${cursoId}/inscripcion`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Error al cancelar inscripción');
+        return res.json();
+      })
+      .then(data => {
+        mostrarNotificacion('Inscripción cancelada correctamente', 'success');
+        
+        // Remover la tarjeta visualmente 
+        const cursoCard = document.querySelector(`.curso-card[data-id="${cursoId}"]`);
+        if (cursoCard) {
+          cursoCard.classList.add("fade-out");
+          setTimeout(() => {
+            cursoCard.remove();
+            
+            // Mostrar mensaje si no quedan cursos
+            if (document.querySelector("#cursos-grid").childElementCount === 0) {
+              document.getElementById("no-cursos").classList.remove("hidden");
+              document.getElementById("mis-cursos-container").classList.add("hidden");
+            }
+          }, 300);
+        }
+      })
+      .catch(err => {
+        console.error('Error al cancelar inscripción:', err);
+        mostrarNotificacion('Error al cancelar la inscripción', 'error');
+      });
+    }
+
+    // ==========================================
+    // FUNCIÓN PARA MANEJAR ENLACES PROTEGIDOS
+    // ==========================================
+
+    // Función para manejar enlaces que requieren autenticación
+    function setupAuthLinks() {
+      document.querySelectorAll('.auth-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const token = localStorage.getItem('token');
+          const destino = this.getAttribute('href');
+          
+          if (!token) {
+            // Si no hay token, redirigir al login
+            window.location.href = `/login?next=${destino}`;
+            return;
+          }
+          
+          // Establecer un iframe oculto para enviar el token como parte del header
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = destino;
+          form.style.display = 'none';
+          
+          // Agregar el token como un campo oculto
+          const tokenField = document.createElement('input');
+          tokenField.type = 'hidden';
+          tokenField.name = 'access_token';
+          tokenField.value = token;
+          
+          form.appendChild(tokenField);
+          document.body.appendChild(form);
+          
+          // Establecer la cookie con el token (válida para esta sesión)
+          document.cookie = `access_token=${token}; path=/`;
+          
+          // Hacer una petición para verificar que el token es válido
+          fetch(`${API_URL}/usuarios/me`, {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json'
+            }
+          })
+          .then(res => {
+            if (!res.ok) {
+              throw new Error('Token inválido');
+            }
+            // Si el token es válido, redirigir a la página destino
+            window.location.href = destino;
+          })
+          .catch(err => {
+            console.error('Error de autenticación:', err);
+            // Si hay un error, limpiar el token y redirigir al login
+            localStorage.removeItem('token');
+            window.location.href = `/login?next=${destino}`;
+          });
+        });
+      });
+    }
+
+    // ==========================================
+    // INICIALIZACIÓN GENERAL
+    // ==========================================
+
+    // Cuando el DOM esté cargado, inicializar la aplicación
+    document.addEventListener('DOMContentLoaded', function() {
+      // Verificar la sesión cada vez que carga la página
+      checkSession();
+      
+      // Cargar los cursos del usuario
+      loadMisCursos();
+      
+      // Configurar los enlaces protegidos
+      setupAuthLinks();
+
+      // Funcionalidad del menú móvil
+      document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenu.classList.toggle('hidden');
+      });
+
+      // Funcionalidad del dropdown de perfil en desktop
+      document.getElementById('perfil-btn-desktop')?.addEventListener('click', function() {
+        const dropdown = document.getElementById('perfil-dropdown-desktop');
+        dropdown.classList.toggle('hidden');
+      });
+
+      // Cerrar dropdown al hacer clic fuera
+      document.addEventListener('click', function(e) {
+        const perfilBtn = document.getElementById('perfil-btn-desktop');
+        const dropdown = document.getElementById('perfil-dropdown-desktop');
+        
+        if (perfilBtn && dropdown && !perfilBtn.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.add('hidden');
+        }
+      });
+
+      // Configurar modal de confirmación
+      const cancelBtn = document.getElementById("cancel-btn");
+      const confirmBtn = document.getElementById("confirm-btn");
+      const confirmModal = document.getElementById("confirm-modal");
+      
+      if (cancelBtn) {
+        cancelBtn.addEventListener("click", () => {
+          confirmModal.classList.add("hidden");
+          window.cursoIdToCancel = null;
+        });
+      }
+      
+      if (confirmBtn) {
+        confirmBtn.addEventListener("click", () => {
+          if (!window.cursoIdToCancel) {
+            confirmModal.classList.add("hidden");
+            return;
+          }
+          
+          const cursoId = window.cursoIdToCancel;
+          confirmModal.classList.add("hidden");
+          
+          // Cancelar inscripción
+          cancelarInscripcion(cursoId);
+          
+          window.cursoIdToCancel = null;
+        });
+      }
+      
+      // Cerrar modal al hacer clic fuera
+      window.addEventListener("click", (e) => {
+        if (confirmModal && e.target === confirmModal) {
+          confirmModal.classList.add("hidden");
+          window.cursoIdToCancel = null;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
