@@ -3,11 +3,12 @@ from fastapi import Depends, HTTPException, status, Request, Form
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
-from app.database import SessionLocal
-from app import crud, schemas
+from ..database import SessionLocal
+from .. import crud, schemas
 import os
 from typing import Optional
 from dotenv import load_dotenv
+
 
 load_dotenv()
 

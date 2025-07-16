@@ -1,13 +1,18 @@
+
+
 # app/routers/auth.py
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from app import crud, schemas
-from app.deps import get_db
+from .. import crud, schemas
+from ..deps import get_db
 import os
 from dotenv import load_dotenv
+
+
 
 # Cargar configuración del entorno
 load_dotenv()

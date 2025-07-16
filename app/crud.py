@@ -1,8 +1,9 @@
 # app/crud.py
 from sqlalchemy.orm import Session
-from app import models, schemas
+from .. import models, schemas
 from passlib.context import CryptContext
 from datetime import datetime
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
