@@ -7,9 +7,8 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-import crud
-import schemas
-from deps import get_db
+from app import crud, schemas
+from app.deps import get_db
 import os
 from dotenv import load_dotenv
 
