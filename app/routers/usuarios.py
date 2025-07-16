@@ -5,9 +5,12 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 
-from .. import schemas, crud, models
-from ..database import SessionLocal
-from ..deps import get_current_user
+import schemas
+import crud
+import models
+from database import SessionLocal
+from deps import get_current_user
+
 
 
 # Cargar variables de entorno para JWT

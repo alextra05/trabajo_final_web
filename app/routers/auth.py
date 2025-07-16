@@ -7,11 +7,11 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from .. import crud, schemas
-from ..deps import get_db
+import crud
+import schemas
+from deps import get_db
 import os
 from dotenv import load_dotenv
-
 
 
 # Cargar configuración del entorno
