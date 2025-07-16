@@ -5,11 +5,9 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 
-import schemas
-import crud
-import models
-from database import SessionLocal
-from deps import get_current_user
+from app import schemas, crud, models
+from app.database import SessionLocal
+from app.deps import get_current_user
 
 
 
