@@ -6,9 +6,9 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 
-from routers import auth, usuarios, cursos, superadmin
-
+from app.routers import auth, usuarios, cursos  # 👈 ¡sin superadmin!
 from app.deps import get_current_user
+
 
 
 app = FastAPI(title="Academia de Programación")
